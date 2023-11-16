@@ -1,4 +1,4 @@
-package info.jukov.rijksmuseum.feature.list.presentation.model
+package info.jukov.rijksmuseum.feature.list.domain.model
 
 data class CollectionItem(
     val id: Int,

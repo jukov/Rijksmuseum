@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import dagger.hilt.android.AndroidEntryPoint
-import info.jukov.rijksmuseum.feature.list.presentation.model.CollectionItem
+import info.jukov.rijksmuseum.feature.list.domain.model.CollectionItem
 import info.jukov.rijksmuseum.ui.theme.RijksmuseumTheme
 
 @AndroidEntryPoint
