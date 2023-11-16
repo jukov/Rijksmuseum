@@ -3,11 +3,12 @@ package info.jukov.rijksmuseum.ui.feature.list.presentation
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.CreationExtras
+import dagger.hilt.android.lifecycle.HiltViewModel
 import info.jukov.rijksmuseum.ui.feature.list.presentation.model.CollectionItem
+import javax.inject.Inject
 
-class CollectionViewModel: ViewModel() {
+@HiltViewModel
+class CollectionViewModel @Inject constructor(): ViewModel() {
 
     private val mutableModel = MutableLiveData<List<CollectionItem>>()
     val model: LiveData<List<CollectionItem>> = mutableModel
@@ -22,17 +23,5 @@ class CollectionViewModel: ViewModel() {
                 )
             }
         )
-    }
-
-    companion object {
-        val Factory: ViewModelProvider.Factory = object : ViewModelProvider.Factory { // TODO DI
-            @Suppress("UNCHECKED_CAST")
-            override fun <T : ViewModel> create(
-                modelClass: Class<T>,
-                extras: CreationExtras
-            ): T {
-                return CollectionViewModel() as T
-            }
-        }
     }
 }

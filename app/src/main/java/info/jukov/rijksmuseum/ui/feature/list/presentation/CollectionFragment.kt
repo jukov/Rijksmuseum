@@ -26,12 +26,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import dagger.hilt.android.AndroidEntryPoint
 import info.jukov.rijksmuseum.ui.feature.list.presentation.model.CollectionItem
 import info.jukov.rijksmuseum.ui.theme.RijksmuseumTheme
 
+@AndroidEntryPoint
 class CollectionFragment : Fragment() {
 
-    private val viewModel: CollectionViewModel by viewModels { CollectionViewModel.Factory }
+    private val viewModel: CollectionViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
