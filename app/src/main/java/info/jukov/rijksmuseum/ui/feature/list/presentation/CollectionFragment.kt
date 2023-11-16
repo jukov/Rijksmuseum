@@ -4,18 +4,34 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import info.jukov.rijksmuseum.ui.feature.list.presentation.model.CollectionItem
 import info.jukov.rijksmuseum.ui.theme.RijksmuseumTheme
 
-class CollectionFragment: Fragment() {
+class CollectionFragment : Fragment() {
+
+    private val viewModel: CollectionViewModel by viewModels { CollectionViewModel.Factory }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,7 +46,11 @@ class CollectionFragment: Fragment() {
                         modifier = Modifier.fillMaxSize(),
                         color = MaterialTheme.colorScheme.background
                     ) {
-                        Greeting("Android")
+                        val listState = rememberLazyListState()
+
+                        val modelState = viewModel.model.observeAsState()
+
+                        Content(listState, modelState)
                     }
                 }
             }
@@ -38,18 +58,42 @@ class CollectionFragment: Fragment() {
     }
 
     @Composable
-    fun Greeting(name: String, modifier: Modifier = Modifier) {
-        Text(
-            text = "Hello $name!",
-            modifier = modifier
-        )
+    private fun Content(
+        listState: LazyListState,
+        modelState: State<List<CollectionItem>?>
+    ) {
+        LazyColumn(state = listState) {
+            modelState.value?.let { model ->
+                itemsIndexed(model) { _, item ->
+                    Column(modifier = Modifier.padding(8.dp)) { // TODO Material 3
+                        Text(
+                            text = item.name,
+                            fontSize = 18.sp
+                        )
+                        Text(
+                            text = item.description,
+                            fontSize = 14.sp
+                        )
+                    }
+                }
+            }
+        }
     }
 
     @Preview(showBackground = true)
     @Composable
     fun GreetingPreview() {
+        val model = remember {
+            mutableStateOf((1..20).map { index ->
+                CollectionItem(
+                    index,
+                    "Painting $index",
+                    "Painting from famous author $index"
+                )
+            })
+        }
         RijksmuseumTheme {
-            Greeting("Android")
+            Content(rememberLazyListState(), model)
         }
     }
 }
