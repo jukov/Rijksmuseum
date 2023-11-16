@@ -3,7 +3,7 @@ package info.jukov.rijksmuseum
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import dagger.hilt.android.AndroidEntryPoint
-import info.jukov.rijksmuseum.ui.feature.list.presentation.CollectionFragment
+import info.jukov.rijksmuseum.feature.list.presentation.CollectionFragment
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
