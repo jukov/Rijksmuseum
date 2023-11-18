@@ -20,6 +20,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -73,7 +74,12 @@ class CollectionFragment : Fragment() {
                             fontSize = 18.sp
                         )
                         Text(
-                            text = item.description,
+                            text = item.author?.let { "by $it" } ?: "",//TODO i18n
+                            fontSize = 16.sp,
+                            color = Color.Gray
+                        )
+                        Text(
+                            text = item.description ?: "",
                             fontSize = 14.sp
                         )
                     }
@@ -88,9 +94,10 @@ class CollectionFragment : Fragment() {
         val model = remember {
             mutableStateOf((1..20).map { index ->
                 CollectionItem(
-                    index,
+                    index.toString(),
                     "Painting $index",
-                    "Painting from famous author $index"
+                    "Painting from famous author $index",
+                    "Author $index"
                 )
             })
         }

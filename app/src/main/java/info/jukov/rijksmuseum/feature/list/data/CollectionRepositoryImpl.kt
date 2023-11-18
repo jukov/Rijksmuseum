@@ -6,17 +6,24 @@ import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import javax.inject.Inject
 
-class CollectionRepositoryImpl @Inject constructor(): CollectionRepository {
+class CollectionRepositoryImpl @Inject constructor(
+    private val collectionApiService: CollectionApiService
+) : CollectionRepository {
 
     override fun get(): Single<List<CollectionItem>> =
-        Single.just(
-            (1..20).map { index ->
-                CollectionItem(
-                    index,
-                    "Painting $index",
-                    "Painting from famous author $index"
-                )
+        collectionApiService
+            .getCollection(
+                page = 0
+            )
+            .map { dto ->
+                dto.artObjects?.mapNotNull { artObject ->
+                    CollectionItem(
+                        artObject?.id ?: return@mapNotNull null,
+                        artObject.title ?: return@mapNotNull null,
+                        artObject.longTitle,
+                        artObject.principalOrFirstMaker
+                    )
+                } ?: emptyList()
             }
-        )
             .subscribeOn(Schedulers.io())
 }

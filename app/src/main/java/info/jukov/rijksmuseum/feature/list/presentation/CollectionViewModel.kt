@@ -25,16 +25,8 @@ class CollectionViewModel @Inject constructor(
         disposable = repository.get()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
-                onSuccess = {
-                    mutableModel.postValue(
-                        (1..20).map { index ->
-                            CollectionItem(
-                                index,
-                                "Painting $index",
-                                "Painting from famous author $index"
-                            )
-                        }
-                    )
+                onSuccess = { model ->
+                    mutableModel.postValue(model)
                 },
                 onError = {
                     TODO("Handle errors")
