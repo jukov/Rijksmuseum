@@ -1,6 +1,6 @@
-package info.jukov.rijksmuseum.feature.list.domain.model
+package info.jukov.rijksmuseum.feature.art.collection.domain.model
 
-data class CollectionItem(
+data class ArtCollectionItem(
     val id: String,
     val name: String,
     val description: String?,

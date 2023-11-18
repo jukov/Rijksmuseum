@@ -1,4 +1,4 @@
-package info.jukov.rijksmuseum.feature.list.presentation
+package info.jukov.rijksmuseum.feature.art.collection.presentation
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -28,13 +28,13 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import dagger.hilt.android.AndroidEntryPoint
-import info.jukov.rijksmuseum.feature.list.domain.model.CollectionItem
+import info.jukov.rijksmuseum.feature.art.collection.domain.model.ArtCollectionItem
 import info.jukov.rijksmuseum.ui.theme.RijksmuseumTheme
 
 @AndroidEntryPoint
-class CollectionFragment : Fragment() {
+class ArtCollectionFragment : Fragment() {
 
-    private val viewModel: CollectionViewModel by viewModels()
+    private val viewModel: ArtCollectionViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -63,7 +63,7 @@ class CollectionFragment : Fragment() {
     @Composable
     private fun Content(
         listState: LazyListState,
-        modelState: State<List<CollectionItem>?>
+        modelState: State<List<ArtCollectionItem>?>
     ) {
         LazyColumn(state = listState) {
             modelState.value?.let { model ->
@@ -93,7 +93,7 @@ class CollectionFragment : Fragment() {
     fun GreetingPreview() {
         val model = remember {
             mutableStateOf((1..20).map { index ->
-                CollectionItem(
+                ArtCollectionItem(
                     index.toString(),
                     "Painting $index",
                     "Painting from famous author $index",

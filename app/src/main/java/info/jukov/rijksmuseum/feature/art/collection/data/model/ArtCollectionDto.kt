@@ -1,4 +1,4 @@
-package info.jukov.rijksmuseum.feature.list.data.model
+package info.jukov.rijksmuseum.feature.art.collection.data.model
 
 import androidx.annotation.Keep
 import com.squareup.moshi.Json
@@ -6,7 +6,7 @@ import com.squareup.moshi.JsonClass
 
 @Keep
 @JsonClass(generateAdapter = true)
-data class CollectionDto(
+data class ArtCollectionDto(
     @Json(name = "artObjects") val artObjects: List<ArtObject?>?,
     @Json(name = "count") val count: Int?,
     @Json(name = "countFacets") val countFacets: CountFacets?,

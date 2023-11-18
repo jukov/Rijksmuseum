@@ -3,7 +3,7 @@ package info.jukov.rijksmuseum
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import dagger.hilt.android.AndroidEntryPoint
-import info.jukov.rijksmuseum.feature.list.presentation.CollectionFragment
+import info.jukov.rijksmuseum.feature.art.collection.presentation.ArtCollectionFragment
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
@@ -16,7 +16,7 @@ class MainActivity : FragmentActivity() {
     private fun showCollectionFragment() {
         supportFragmentManager
             .beginTransaction()
-            .replace(android.R.id.content, CollectionFragment())
+            .replace(android.R.id.content, ArtCollectionFragment())
             .commit()
     }
 }
