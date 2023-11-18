@@ -23,10 +23,7 @@ class ArtCollectionViewModel @Inject constructor(
 
     private var disposable: Disposable? = null
 
-    private val mutableModel = MutableLiveData<ArtCollectionUiModel>(
-        EmptyProgress
-    )
-
+    private val mutableModel = MutableLiveData<ArtCollectionUiModel>(EmptyProgress)
     val model: LiveData<ArtCollectionUiModel> = mutableModel
 
     init {
@@ -114,7 +111,6 @@ class ArtCollectionViewModel @Inject constructor(
         val current = mutableModel.value
         if (current !is Content) {
             error("Unexpected ui state ${current?.javaClass?.simpleName}")
-            return
         }
         mutableModel.postValue(current.copy(refreshing = true))
         loadInitial()
@@ -122,9 +118,5 @@ class ArtCollectionViewModel @Inject constructor(
 
     override fun onCleared() {
         disposable?.dispose()
-    }
-
-    companion object {
-        private const val TAG = "ArtCollectionViewModel"
     }
 }

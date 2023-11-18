@@ -13,7 +13,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import dagger.hilt.android.AndroidEntryPoint
-import info.jukov.rijksmuseum.feature.art.item.presentation.ArtItemScreen
+import info.jukov.rijksmuseum.feature.art.details.presentation.ArtDetailsScreen
 import info.jukov.rijksmuseum.feature.artcollection.presentation.ArtCollectionScreen
 import info.jukov.rijksmuseum.ui.theme.RijksmuseumTheme
 
@@ -42,11 +42,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(
                             "art/{itemId}",
-                            arguments = listOf(navArgument("itemId") { type = NavType.StringType })
-                        ) { backStackEntry ->
-                            ArtItemScreen(
-                                itemId = requireNotNull(backStackEntry.arguments?.getString("itemId"))
-                            )
+                            arguments = listOf(navArgument(Const.Keys.ITEM_ID) { type = NavType.StringType })
+                        ) {
+                            ArtDetailsScreen()
                         }
                     }
                 }

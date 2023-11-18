@@ -16,7 +16,7 @@ class ArtCollectionRepositoryImpl @Inject constructor(
             .map { dto ->
                 dto.artObjects?.mapNotNull { artObject ->
                     ArtCollectionItem(
-                        artObject?.id ?: return@mapNotNull null,
+                        artObject?.objectNumber ?: return@mapNotNull null,
                         artObject.title ?: return@mapNotNull null,
                         artObject.longTitle,
                         artObject.principalOrFirstMaker

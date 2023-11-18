@@ -6,4 +6,8 @@ object Const {
         const val CULTURE = "en"
         const val PAGE_SIZE = 20
     }
+
+    object Keys {
+        const val ITEM_ID = "itemId"
+    }
 }
