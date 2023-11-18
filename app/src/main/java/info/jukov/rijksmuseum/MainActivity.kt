@@ -1,22 +1,56 @@
 package info.jukov.rijksmuseum
 
 import android.os.Bundle
-import androidx.fragment.app.FragmentActivity
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import dagger.hilt.android.AndroidEntryPoint
-import info.jukov.rijksmuseum.feature.art.collection.presentation.ArtCollectionFragment
+import info.jukov.rijksmuseum.feature.art.item.presentation.ArtItemScreen
+import info.jukov.rijksmuseum.feature.artcollection.presentation.ArtCollectionScreen
+import info.jukov.rijksmuseum.ui.theme.RijksmuseumTheme
 
 @AndroidEntryPoint
-class MainActivity : FragmentActivity() {
+class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        savedInstanceState ?: showCollectionFragment()
-    }
+        setContent {
+            val navController = rememberNavController()
 
-    private fun showCollectionFragment() {
-        supportFragmentManager
-            .beginTransaction()
-            .replace(android.R.id.content, ArtCollectionFragment())
-            .commit()
+            RijksmuseumTheme {
+
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    NavHost(navController = navController, startDestination = "art/collection") {
+                        composable("art/collection") {
+                            ArtCollectionScreen(
+                                onItemClick = { itemId: String ->
+                                    navController.navigate("art/$itemId")
+                                }
+                            )
+                        }
+                        composable(
+                            "art/{itemId}",
+                            arguments = listOf(navArgument("itemId") { type = NavType.StringType })
+                        ) { backStackEntry ->
+                            ArtItemScreen(
+                                itemId = requireNotNull(backStackEntry.arguments?.getString("itemId"))
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
