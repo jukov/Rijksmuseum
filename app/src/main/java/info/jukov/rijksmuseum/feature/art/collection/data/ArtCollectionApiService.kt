@@ -10,7 +10,7 @@ import retrofit2.http.Query
 
 interface ArtCollectionApiService {
 
-    @GET("api/{culture}/collection?p=0&ps=20")
+    @GET("api/{culture}/collection")
     fun getCollection(
         @Path("culture") culture: String = Const.Network.CULTURE,
         @Query("key") key: String = BuildConfig.API_KEY,

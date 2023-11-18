@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Rijksmuseum</string>
+
+    <string name="art_collection_empty_error_icon_content_description">Art Icon</string>
+    <string name="art_collection_empty_error">An error occurred while fetching art collection</string>
+    <string name="art_collection_empty_error_undocumented">Undocumented Error</string>
+    <string name="art_collection_empty_error_reload">Try again</string>
 </resources>

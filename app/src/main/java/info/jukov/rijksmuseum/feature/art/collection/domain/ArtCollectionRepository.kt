@@ -5,6 +5,6 @@ import io.reactivex.rxjava3.core.Single
 
 interface ArtCollectionRepository {
 
-    fun get(): Single<List<ArtCollectionItem>>
+    fun get(page: Int): Single<List<ArtCollectionItem>>
 
 }

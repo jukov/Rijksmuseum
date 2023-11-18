@@ -10,11 +10,9 @@ class ArtCollectionRepositoryImpl @Inject constructor(
     private val apiService: ArtCollectionApiService
 ) : ArtCollectionRepository {
 
-    override fun get(): Single<List<ArtCollectionItem>> =
+    override fun get(page: Int): Single<List<ArtCollectionItem>> =
         apiService
-            .getCollection(
-                page = 0
-            )
+            .getCollection(page = page)
             .map { dto ->
                 dto.artObjects?.mapNotNull { artObject ->
                     ArtCollectionItem(
