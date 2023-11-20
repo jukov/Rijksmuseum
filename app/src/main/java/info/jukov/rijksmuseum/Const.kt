@@ -10,5 +10,6 @@ object Const {
 
     object Keys {
         const val ITEM_ID = "itemId"
+        const val ITEM_NAME = "itemName"
     }
 }

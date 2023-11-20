@@ -34,16 +34,25 @@ class MainActivity : ComponentActivity() {
                     NavHost(navController = navController, startDestination = "art/collection") {
                         composable("art/collection") {
                             ArtCollectionScreen(
-                                onItemClick = { itemId: String ->
-                                    navController.navigate("art/$itemId")
+                                onItemClick = { itemId: String, itemName: String ->
+                                    navController.navigate(
+                                        "art/$itemId/$itemName",
+
+                                    )
                                 }
                             )
                         }
                         composable(
-                            "art/{itemId}",
-                            arguments = listOf(navArgument(Const.Keys.ITEM_ID) { type = NavType.StringType })
-                        ) {
-                            ArtDetailsScreen()
+                            "art/{itemId}/{itemName}",
+                            arguments = listOf(
+                                navArgument(Const.Keys.ITEM_ID) { type = NavType.StringType },
+                                navArgument(Const.Keys.ITEM_NAME) { type = NavType.StringType },
+                            )
+                        ) { backStackEntry ->
+                            ArtDetailsScreen(
+                                onBackClick = { navController.popBackStack() },
+                                itemName = requireNotNull(backStackEntry.arguments?.getString(Const.Keys.ITEM_NAME))
+                            )
                         }
                     }
                 }

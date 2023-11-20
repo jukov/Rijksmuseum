@@ -18,7 +18,7 @@ class ArtCollectionRepositoryImpl @Inject constructor(
                     ArtCollectionItem(
                         artObject?.objectNumber ?: return@mapNotNull null,
                         artObject.title ?: return@mapNotNull null,
-                        artObject.longTitle,
+                        artObject.longTitle ?: return@mapNotNull null,
                         artObject.principalOrFirstMaker,
                         artObject.webImage?.url
                     )

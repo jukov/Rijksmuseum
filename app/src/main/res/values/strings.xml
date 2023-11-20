@@ -7,4 +7,42 @@
     <string name="art_collection_empty_error_reload">Try again</string>
     <string name="art_collection_object_image_content_description">Art object image</string>
     <string name="art_collection_object_image_fallback">This art object is not yet available digitally</string>
+
+    <string name="art_details_back_content_description">Back to collection</string>
+
+    <string name="art_details_description">Description</string>
+    <string name="art_details_description_date">Date</string>
+    <string name="art_details_description_group_creation">Creation</string>
+    <string name="art_details_description_group_material_and_technique">Material and Technique</string>
+
+
+    <plurals name="author">
+        <item quantity="one">Author</item>
+        <item quantity="other">Author</item>
+        <item quantity="many">Authors</item>
+    </plurals>
+
+    <plurals name="place">
+        <item quantity="one">Place</item>
+        <item quantity="other">Place</item>
+        <item quantity="many">Places</item>
+    </plurals>
+
+    <plurals name="technique">
+        <item quantity="one">Technique</item>
+        <item quantity="other">Technique</item>
+        <item quantity="many">Techniques</item>
+    </plurals>
+
+    <plurals name="material">
+        <item quantity="one">Material</item>
+        <item quantity="other">Material</item>
+        <item quantity="many">Materials</item>
+    </plurals>
+
+    <plurals name="measurement">
+        <item quantity="one">Measurement</item>
+        <item quantity="other">Measurement</item>
+        <item quantity="many">Measurements</item>
+    </plurals>
 </resources>

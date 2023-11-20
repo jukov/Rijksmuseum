@@ -3,7 +3,6 @@ package info.jukov.rijksmuseum.feature.art.collection.presentation
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,7 +63,7 @@ import info.jukov.rijksmuseum.util.shouldLoadMore
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ArtCollectionScreen(
-    onItemClick: (itemId: String) -> Unit,
+    onItemClick: (itemId: String, itemName: String) -> Unit,
     viewModel: ArtCollectionViewModel = hiltViewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
@@ -127,7 +126,7 @@ fun ArtCollectionScreen(
 private fun Content(
     outerPadding: PaddingValues,
     model: ArtCollectionUiState.Content,
-    onItemClick: (itemId: String) -> Unit,
+    onItemClick: (itemId: String, itemName: String) -> Unit,
     onRefresh: () -> Unit,
     onLoadMore: () -> Unit,
     onPageReload: () -> Unit
@@ -143,9 +142,10 @@ private fun Content(
         derivedStateOf { listState.shouldLoadMore() }
     }
 
-    Box(modifier = Modifier
-        .pullRefresh(pullRefreshState)
-        .padding(outerPadding)
+    Box(
+        modifier = Modifier
+            .pullRefresh(pullRefreshState)
+            .padding(outerPadding)
     ) {
         LazyVerticalStaggeredGrid(
             state = listState,
@@ -220,15 +220,21 @@ private fun ArtHeader(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ArtItem(
-    onItemClick: (itemId: String) -> Unit,
+    onItemClick: (itemId: String, itemName: String) -> Unit,
     item: ArtCollectionItem
 ) {
-    Card(modifier = Modifier.padding(4.dp)) {
-        Column(modifier = Modifier
-            .padding(16.dp)
-            .clickable { onItemClick(item.id) }) {
+    Card(
+        onClick = { onItemClick(item.id, item.title) },
+        modifier = Modifier
+            .padding(4.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+        ) {
             if (item.imageUrl == null) {
                 Card(border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant)) {
                     Text(
@@ -248,7 +254,7 @@ private fun ArtItem(
                 )
             }
             Text(
-                text = item.name,
+                text = item.longTitle,
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.padding(top = 8.dp)
             )
@@ -393,7 +399,7 @@ fun ContentPreview() {
             )
         })
     RijksmuseumTheme {
-        Content(PaddingValues(), model, { }, { }, { }, { })
+        Content(PaddingValues(), model, { _, _ -> }, { }, { }, { })
     }
 }
 
@@ -425,7 +431,7 @@ fun PageErrorPreview() {
 @Composable
 fun ArtCollectionItemPreview() {
     ArtItem(
-        { },
+        { _, _ -> },
         ArtCollectionItem(
             "1",
             "Painting",
