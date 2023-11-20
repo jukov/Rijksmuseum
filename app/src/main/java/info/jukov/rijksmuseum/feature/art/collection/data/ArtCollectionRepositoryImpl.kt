@@ -19,7 +19,8 @@ class ArtCollectionRepositoryImpl @Inject constructor(
                         artObject?.objectNumber ?: return@mapNotNull null,
                         artObject.title ?: return@mapNotNull null,
                         artObject.longTitle,
-                        artObject.principalOrFirstMaker
+                        artObject.principalOrFirstMaker,
+                        artObject.webImage?.url
                     )
                 } ?: emptyList()
             }

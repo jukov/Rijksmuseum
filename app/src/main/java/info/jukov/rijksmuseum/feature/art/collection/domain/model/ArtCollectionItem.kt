@@ -4,5 +4,6 @@ data class ArtCollectionItem(
     val id: String,
     val name: String,
     val description: String?,
-    val author: String?
+    val author: String?,
+    val imageUrl: String?,
 )

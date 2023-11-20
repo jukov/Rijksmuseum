@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -39,6 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import info.jukov.rijksmuseum.R
 import info.jukov.rijksmuseum.feature.art.collection.domain.model.ArtCollectionItem
 import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiModel
@@ -112,6 +114,7 @@ private fun Content(
                             ArtHeader(item.title)
                         }
                     }
+
                     is Item -> {
                         item {
                             ArtItem(onItemClick, item.item)
@@ -177,23 +180,30 @@ private fun ArtItem(
     onItemClick: (itemId: String) -> Unit,
     item: ArtCollectionItem
 ) {
-    Column(modifier = Modifier
+    Row(modifier = Modifier
         .padding(8.dp)
-        .clickable { onItemClick(item.id) }
-    ) { // TODO Material 3
-        Text(
-            text = item.name,
-            fontSize = 18.sp
+        .clickable { onItemClick(item.id) }) {
+        AsyncImage(
+            model = item.imageUrl,
+            contentDescription = stringResource(R.string.art_collection_object_image_content_description),
+            contentScale = ContentScale.Fit,
+            modifier = Modifier.width(72.dp)
         )
-        Text(
-            text = item.author?.let { "by $it" } ?: "",//TODO i18n
-            fontSize = 16.sp,
-            color = Color.Gray
-        )
-        Text(
-            text = item.description ?: "",
-            fontSize = 14.sp
-        )
+        Column { // TODO Material 3
+            Text(
+                text = item.name,
+                fontSize = 18.sp
+            )
+            Text(
+                text = item.author?.let { "by $it" } ?: "",//TODO i18n
+                fontSize = 16.sp,
+                color = Color.Gray
+            )
+            Text(
+                text = item.description ?: "",
+                fontSize = 14.sp
+            )
+        }
     }
 }
 
@@ -322,7 +332,8 @@ fun ContentPreview() {
                     index.toString(),
                     "Painting $index",
                     "Painting from famous author $index",
-                    "Author $index"
+                    "Author $index",
+                    "https://www.google.com/favicon.ico"
                 )
             )
         })
@@ -364,7 +375,8 @@ fun ArtCollectionItemPreview() {
             "1",
             "Painting",
             "Painting from The Famous Author",
-            "The Famous Author"
+            "The Famous Author",
+            "https://www.google.com/favicon.ico"
         )
     )
 }
