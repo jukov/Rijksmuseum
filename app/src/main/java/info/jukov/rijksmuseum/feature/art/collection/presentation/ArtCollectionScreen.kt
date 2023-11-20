@@ -1,27 +1,37 @@
 package info.jukov.rijksmuseum.feature.art.collection.presentation
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.Card
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -29,12 +39,14 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,53 +59,80 @@ import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtColle
 import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiState
 import info.jukov.rijksmuseum.feature.art.collection.presentation.model.PageState
 import info.jukov.rijksmuseum.ui.theme.RijksmuseumTheme
+import info.jukov.rijksmuseum.util.shouldLoadMore
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ArtCollectionScreen(
     onItemClick: (itemId: String) -> Unit,
     viewModel: ArtCollectionViewModel = hiltViewModel()
 ) {
+    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+
     val modelState = viewModel.model.observeAsState()
 
-    modelState.value?.let { model ->
-        when (model) {
-            is ArtCollectionUiState.Content ->
-                Content(
-                    model = model,
-                    onItemClick = onItemClick,
-                    onRefresh = { viewModel.refresh() },
-                    onLoadMore = { viewModel.loadMore() },
-                    onPageReload = { viewModel.reloadPage() }
-                )
+    Scaffold(
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
 
-            ArtCollectionUiState.EmptyProgress ->
-                EmptyProgress()
+        topBar = {
+            CenterAlignedTopAppBar(
+                colors = TopAppBarDefaults.mediumTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                ),
+                title = {
+                    Text(
+                        stringResource(id = R.string.app_name),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
+                scrollBehavior = scrollBehavior,
+            )
+        },
+    ) { innerPadding ->
+        modelState.value?.let { model ->
+            when (model) {
+                is ArtCollectionUiState.Content ->
+                    Content(
+                        outerPadding = innerPadding,
+                        model = model,
+                        onItemClick = onItemClick,
+                        onRefresh = { viewModel.refresh() },
+                        onLoadMore = { viewModel.loadMore() },
+                        onPageReload = { viewModel.reloadPage() }
+                    )
 
-            is ArtCollectionUiState.EmptyError ->
-                EmptyError(
-                    message = model.message,
-                    onReloadClick = {
-                        viewModel.reload()
-                    }
-                )
+                ArtCollectionUiState.EmptyProgress ->
+                    EmptyProgress(
+                        outerPadding = innerPadding
+                    )
+
+                is ArtCollectionUiState.EmptyError ->
+                    EmptyError(
+                        outerPadding = innerPadding,
+                        message = model.message,
+                        onReloadClick = {
+                            viewModel.reload()
+                        }
+                    )
+            }
         }
     }
-}
-
-fun LazyListState.shouldLoadMore(): Boolean {
-    return firstVisibleItemIndex > layoutInfo.totalItemsCount - 10 || !canScrollForward
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun Content(
+    outerPadding: PaddingValues,
     model: ArtCollectionUiState.Content,
     onItemClick: (itemId: String) -> Unit,
     onRefresh: () -> Unit,
     onLoadMore: () -> Unit,
     onPageReload: () -> Unit
 ) {
-    val listState = rememberLazyListState()
+    val listState = rememberLazyStaggeredGridState()
 
     val pullRefreshState = rememberPullRefreshState(
         refreshing = model.refreshing,
@@ -104,12 +143,19 @@ private fun Content(
         derivedStateOf { listState.shouldLoadMore() }
     }
 
-    Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
-        LazyColumn(state = listState) {
+    Box(modifier = Modifier
+        .pullRefresh(pullRefreshState)
+        .padding(outerPadding)
+    ) {
+        LazyVerticalStaggeredGrid(
+            state = listState,
+            columns = StaggeredGridCells.Adaptive(150.dp),
+            modifier = Modifier.padding(horizontal = 8.dp)
+        ) {
             for (item in model.items) {
                 when (item) {
                     is ArtCollectionUiModel.Header -> {
-                        stickyHeader {
+                        item(span = StaggeredGridItemSpan.FullLine) {
                             ArtHeader(item.title)
                         }
                     }
@@ -124,7 +170,7 @@ private fun Content(
 
             when (model.newPageState) {
                 is PageState.Error -> {
-                    item {
+                    item(span = StaggeredGridItemSpan.FullLine) {
                         PageError(
                             message = model.newPageState.message,
                             onReloadClick = {
@@ -135,7 +181,7 @@ private fun Content(
                 }
 
                 PageState.Loading -> {
-                    item {
+                    item(span = StaggeredGridItemSpan.FullLine) {
                         PageProgress()
                     }
                 }
@@ -163,13 +209,13 @@ private fun Content(
 private fun ArtHeader(
     title: String
 ) {
-    Box(modifier = Modifier.background(Color.Gray)) {
+    Box {
         Text(
             text = title,
-            fontSize = 18.sp,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(8.dp),
+            style = MaterialTheme.typography.titleMedium
         )
     }
 }
@@ -179,38 +225,47 @@ private fun ArtItem(
     onItemClick: (itemId: String) -> Unit,
     item: ArtCollectionItem
 ) {
-    Row(modifier = Modifier
-        .padding(8.dp)
-        .clickable { onItemClick(item.id) }) {
-        AsyncImage(
-            model = item.imageUrl,
-            contentDescription = stringResource(R.string.art_collection_object_image_content_description),
-            contentScale = ContentScale.Fit,
-            modifier = Modifier.width(72.dp)
-        )
-        Column {
+    Card(modifier = Modifier.padding(4.dp)) {
+        Column(modifier = Modifier
+            .padding(16.dp)
+            .clickable { onItemClick(item.id) }) {
+            if (item.imageUrl == null) {
+                Card(border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant)) {
+                    Text(
+                        text = stringResource(R.string.art_collection_object_image_fallback),
+                        style = MaterialTheme.typography.labelSmall,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 24.dp)
+                    )
+                }
+            } else {
+                //TODO placeholder with approx size of container from api
+                AsyncImage(
+                    model = item.imageUrl,
+                    contentDescription = stringResource(R.string.art_collection_object_image_content_description),
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.clip(RoundedCornerShape(8.dp))
+                )
+            }
             Text(
                 text = item.name,
-                fontSize = 18.sp
-            )
-            Text(
-                text = item.author?.let { "by $it" } ?: "",//TODO i18n
-                fontSize = 16.sp,
-                color = Color.Gray
-            )
-            Text(
-                text = item.description ?: "",
-                fontSize = 14.sp
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.padding(top = 8.dp)
             )
         }
     }
 }
 
 @Composable
-private fun EmptyProgress() {
+private fun EmptyProgress(outerPadding: PaddingValues) {
     //TODO shimmer
     //TODO animate change
-    Box(contentAlignment = Alignment.Center) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .padding(outerPadding)
+            .fillMaxSize()
+    ) {
         CircularProgressIndicator()
     }
 }
@@ -239,15 +294,6 @@ private fun PageError(
             .padding(horizontal = 16.dp)
             .fillMaxWidth()
     ) {
-        Image(
-            painter = painterResource(R.drawable.baseline_palette_24),
-            contentDescription = stringResource(R.string.art_collection_empty_error_icon_content_description),
-            colorFilter = ColorFilter.tint(Color.Black),
-            modifier = Modifier
-                .width(48.dp)
-                .height(48.dp)
-        )
-
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start,
@@ -258,12 +304,16 @@ private fun PageError(
 
             Text(
                 text = stringResource(R.string.art_collection_empty_error),
-                fontSize = 16.sp,
+                style = MaterialTheme.typography.titleSmall,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
 
             Text(
                 text = message ?: stringResource(R.string.art_collection_empty_error_undocumented),
-                fontSize = 14.sp,
+                style = MaterialTheme.typography.bodySmall,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
         }
 
@@ -277,41 +327,47 @@ private fun PageError(
 
 @Composable
 private fun EmptyError(
+    outerPadding: PaddingValues,
     message: String?,
     onReloadClick: () -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(outerPadding)
     ) {
         Image(
             painter = painterResource(R.drawable.baseline_palette_24),
             contentDescription = stringResource(R.string.art_collection_empty_error_icon_content_description),
-            colorFilter = ColorFilter.tint(Color.Black),
+            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
             modifier = Modifier
                 .width(48.dp)
                 .height(48.dp)
+                .padding(horizontal = 32.dp)
         )
-
         Text(
             text = stringResource(R.string.art_collection_empty_error),
-            fontSize = 18.sp,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 16.dp)
+            modifier = Modifier.padding(top = 16.dp, start = 32.dp, end = 32.dp),
+            maxLines = 5,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.titleMedium
         )
 
         Text(
             text = message ?: stringResource(R.string.art_collection_empty_error_undocumented),
             fontSize = 16.sp,
             textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 8.dp)
+            modifier = Modifier.padding(top = 8.dp, start = 32.dp, end = 32.dp),
+            maxLines = 5,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.bodyMedium
         )
 
         OutlinedButton(
             onClick = onReloadClick,
-            modifier = Modifier.padding(top = 16.dp),
-
-            ) {
+            modifier = Modifier.padding(top = 16.dp, start = 32.dp, end = 32.dp)
+        ) {
             Text(text = stringResource(R.string.art_collection_empty_error_reload))
         }
     }
@@ -337,14 +393,14 @@ fun ContentPreview() {
             )
         })
     RijksmuseumTheme {
-        Content(model, { }, { }, { }, { })
+        Content(PaddingValues(), model, { }, { }, { }, { })
     }
 }
 
 @Preview(showBackground = true, widthDp = 300, heightDp = 300)
 @Composable
 fun EmptyProgressPreview() {
-    EmptyProgress()
+    EmptyProgress(PaddingValues())
 }
 
 @Preview(showBackground = true)
@@ -356,16 +412,16 @@ fun PageProgressPreview() {
 @Preview(showBackground = true, widthDp = 300, heightDp = 300)
 @Composable
 fun EmptyErrorPreview() {
-    EmptyError("Can't connect to server", {})
+    EmptyError(PaddingValues(), "Can't connect to server") { }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun PageErrorPreview() {
-    PageError("Can't connect to server", {})
+    PageError("Can't connect to server") { }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, widthDp = 150)
 @Composable
 fun ArtCollectionItemPreview() {
     ArtItem(
@@ -375,7 +431,7 @@ fun ArtCollectionItemPreview() {
             "Painting",
             "Painting from The Famous Author",
             "The Famous Author",
-            "https://www.google.com/favicon.ico"
+            null
         )
     )
 }

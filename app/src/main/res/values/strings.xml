@@ -6,4 +6,5 @@
     <string name="art_collection_empty_error_undocumented">Undocumented Error</string>
     <string name="art_collection_empty_error_reload">Try again</string>
     <string name="art_collection_object_image_content_description">Art object image</string>
+    <string name="art_collection_object_image_fallback">This art object is not yet available digitally</string>
 </resources>
