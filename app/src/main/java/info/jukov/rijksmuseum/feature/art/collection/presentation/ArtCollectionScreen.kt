@@ -15,14 +15,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Text
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -85,7 +84,7 @@ fun LazyListState.shouldLoadMore(): Boolean {
     return firstVisibleItemIndex > layoutInfo.totalItemsCount - 10 || !canScrollForward
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun Content(
     model: ArtCollectionUiState.Content,
@@ -149,7 +148,7 @@ private fun Content(
             model.refreshing,
             pullRefreshState,
             Modifier.align(Alignment.TopCenter),
-            contentColor = MaterialTheme.colors.secondary
+            contentColor = MaterialTheme.colorScheme.secondary
         )
 
         LaunchedEffect(shouldLoadMore.value) {
@@ -189,7 +188,7 @@ private fun ArtItem(
             contentScale = ContentScale.Fit,
             modifier = Modifier.width(72.dp)
         )
-        Column { // TODO Material 3
+        Column {
             Text(
                 text = item.name,
                 fontSize = 18.sp
