@@ -1,20 +1,18 @@
 package info.jukov.rijksmuseum.feature.art.collection.presentation.model
 
-import info.jukov.rijksmuseum.feature.art.collection.domain.model.ArtCollectionItem
-
-sealed class ArtCollectionUiModel {
+sealed class ArtCollectionUiState {
 
     data class Content(
         val refreshing: Boolean,
         val newPageState: PageState,
         val hasNext: Boolean,
         val lastLoadedPage: Int,
-        val items: List<ArtCollectionItem>
-    ) : ArtCollectionUiModel()
+        val items: List<ArtCollectionUiModel>
+    ) : ArtCollectionUiState()
 
-    object EmptyProgress : ArtCollectionUiModel()
+    object EmptyProgress : ArtCollectionUiState()
 
     data class EmptyError(
         val message: String?
-    ) : ArtCollectionUiModel()
+    ) : ArtCollectionUiState()
 }

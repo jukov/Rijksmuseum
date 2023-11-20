@@ -15,6 +15,7 @@ interface ArtCollectionApiService {
         @Path("culture") culture: String = Const.Network.CULTURE,
         @Query("key") key: String = BuildConfig.API_KEY,
         @Query("p") page: Int = 0,
-        @Query("ps") pageSize: Int = Const.Network.PAGE_SIZE
+        @Query("ps") pageSize: Int = Const.Network.PAGE_SIZE,
+        @Query("s") sort: String = Const.Network.SORT
     ): Single<ArtCollectionDto>
 }

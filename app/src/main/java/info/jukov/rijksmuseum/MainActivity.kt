@@ -13,8 +13,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import dagger.hilt.android.AndroidEntryPoint
+import info.jukov.rijksmuseum.feature.art.collection.presentation.ArtCollectionScreen
 import info.jukov.rijksmuseum.feature.art.details.presentation.ArtDetailsScreen
-import info.jukov.rijksmuseum.feature.artcollection.presentation.ArtCollectionScreen
 import info.jukov.rijksmuseum.ui.theme.RijksmuseumTheme
 
 @AndroidEntryPoint

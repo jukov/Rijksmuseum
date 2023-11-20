@@ -1,6 +1,8 @@
-package info.jukov.rijksmuseum.feature.artcollection.presentation
+package info.jukov.rijksmuseum.feature.art.collection.presentation
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
@@ -40,8 +41,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import info.jukov.rijksmuseum.R
 import info.jukov.rijksmuseum.feature.art.collection.domain.model.ArtCollectionItem
-import info.jukov.rijksmuseum.feature.art.collection.presentation.ArtCollectionViewModel
 import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiModel
+import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiModel.Item
+import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiState
 import info.jukov.rijksmuseum.feature.art.collection.presentation.model.PageState
 import info.jukov.rijksmuseum.ui.theme.RijksmuseumTheme
 
@@ -54,7 +56,7 @@ fun ArtCollectionScreen(
 
     modelState.value?.let { model ->
         when (model) {
-            is ArtCollectionUiModel.Content ->
+            is ArtCollectionUiState.Content ->
                 Content(
                     model = model,
                     onItemClick = onItemClick,
@@ -63,10 +65,10 @@ fun ArtCollectionScreen(
                     onPageReload = { viewModel.reloadPage() }
                 )
 
-            ArtCollectionUiModel.EmptyProgress ->
+            ArtCollectionUiState.EmptyProgress ->
                 EmptyProgress()
 
-            is ArtCollectionUiModel.EmptyError ->
+            is ArtCollectionUiState.EmptyError ->
                 EmptyError(
                     message = model.message,
                     onReloadClick = {
@@ -78,13 +80,13 @@ fun ArtCollectionScreen(
 }
 
 fun LazyListState.shouldLoadMore(): Boolean {
-    return firstVisibleItemIndex > layoutInfo.totalItemsCount - 10
+    return firstVisibleItemIndex > layoutInfo.totalItemsCount - 10 || !canScrollForward
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 private fun Content(
-    model: ArtCollectionUiModel.Content,
+    model: ArtCollectionUiState.Content,
     onItemClick: (itemId: String) -> Unit,
     onRefresh: () -> Unit,
     onLoadMore: () -> Unit,
@@ -103,24 +105,18 @@ private fun Content(
 
     Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
         LazyColumn(state = listState) {
-            itemsIndexed(model.items) { _, item ->
-                Column(modifier = Modifier
-                    .padding(8.dp)
-                    .clickable { onItemClick(item.id) }
-                ) { // TODO Material 3
-                    Text(
-                        text = item.name,
-                        fontSize = 18.sp
-                    )
-                    Text(
-                        text = item.author?.let { "by $it" } ?: "",//TODO i18n
-                        fontSize = 16.sp,
-                        color = Color.Gray
-                    )
-                    Text(
-                        text = item.description ?: "",
-                        fontSize = 14.sp
-                    )
+            for (item in model.items) {
+                when (item) {
+                    is ArtCollectionUiModel.Header -> {
+                        stickyHeader {
+                            ArtHeader(item.title)
+                        }
+                    }
+                    is Item -> {
+                        item {
+                            ArtItem(onItemClick, item.item)
+                        }
+                    }
                 }
             }
 
@@ -158,6 +154,46 @@ private fun Content(
                 onLoadMore()
             }
         }
+    }
+}
+
+@Composable
+private fun ArtHeader(
+    title: String
+) {
+    Box(modifier = Modifier.background(Color.Gray)) {
+        Text(
+            text = title,
+            fontSize = 18.sp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+    }
+}
+
+@Composable
+private fun ArtItem(
+    onItemClick: (itemId: String) -> Unit,
+    item: ArtCollectionItem
+) {
+    Column(modifier = Modifier
+        .padding(8.dp)
+        .clickable { onItemClick(item.id) }
+    ) { // TODO Material 3
+        Text(
+            text = item.name,
+            fontSize = 18.sp
+        )
+        Text(
+            text = item.author?.let { "by $it" } ?: "",//TODO i18n
+            fontSize = 16.sp,
+            color = Color.Gray
+        )
+        Text(
+            text = item.description ?: "",
+            fontSize = 14.sp
+        )
     }
 }
 
@@ -206,7 +242,8 @@ private fun PageError(
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.Start,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
                 .padding(horizontal = 8.dp)
         ) {
 
@@ -274,17 +311,19 @@ private fun EmptyError(
 @Preview(showBackground = true)
 @Composable
 fun ContentPreview() {
-    val model = ArtCollectionUiModel.Content(
+    val model = ArtCollectionUiState.Content(
         refreshing = false,
         newPageState = PageState.None,
         hasNext = true,
         0,
         (1..5).map { index ->
-            ArtCollectionItem(
-                index.toString(),
-                "Painting $index",
-                "Painting from famous author $index",
-                "Author $index"
+            Item(
+                ArtCollectionItem(
+                    index.toString(),
+                    "Painting $index",
+                    "Painting from famous author $index",
+                    "Author $index"
+                )
             )
         })
     RijksmuseumTheme {
@@ -314,4 +353,24 @@ fun EmptyErrorPreview() {
 @Composable
 fun PageErrorPreview() {
     PageError("Can't connect to server", {})
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ArtCollectionItemPreview() {
+    ArtItem(
+        { },
+        ArtCollectionItem(
+            "1",
+            "Painting",
+            "Painting from The Famous Author",
+            "The Famous Author"
+        )
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ArtCollectionHeaderPreview() {
+    ArtHeader(title = "The Famous Author")
 }

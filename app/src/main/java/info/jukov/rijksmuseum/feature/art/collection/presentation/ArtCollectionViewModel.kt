@@ -6,10 +6,14 @@ import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import info.jukov.rijksmuseum.Const
 import info.jukov.rijksmuseum.feature.art.collection.domain.ArtCollectionRepository
+import info.jukov.rijksmuseum.feature.art.collection.domain.model.ArtCollectionItem
 import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiModel
-import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiModel.Content
-import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiModel.EmptyError
-import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiModel.EmptyProgress
+import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiModel.Header
+import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiModel.Item
+import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiState
+import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiState.Content
+import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiState.EmptyError
+import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiState.EmptyProgress
 import info.jukov.rijksmuseum.feature.art.collection.presentation.model.PageState
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.Disposable
@@ -23,8 +27,8 @@ class ArtCollectionViewModel @Inject constructor(
 
     private var disposable: Disposable? = null
 
-    private val mutableModel = MutableLiveData<ArtCollectionUiModel>(EmptyProgress)
-    val model: LiveData<ArtCollectionUiModel> = mutableModel
+    private val mutableModel = MutableLiveData<ArtCollectionUiState>(EmptyProgress)
+    val model: LiveData<ArtCollectionUiState> = mutableModel
 
     init {
         loadInitial()
@@ -35,14 +39,17 @@ class ArtCollectionViewModel @Inject constructor(
             return
         }
         disposable = repository.get(1)
+            .map { items ->
+                mapToUiModel(items)
+            }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
-                onSuccess = { items ->
+                onSuccess = { (items, size) ->
                     mutableModel.postValue(
                         Content(
                             refreshing = false,
                             newPageState = PageState.None,
-                            hasNext = items.size == Const.Network.PAGE_SIZE,
+                            hasNext = size == Const.Network.PAGE_SIZE,
                             lastLoadedPage = 1,
                             items = items
                         )
@@ -70,16 +77,19 @@ class ArtCollectionViewModel @Inject constructor(
         mutableModel.postValue(current.copy(newPageState = PageState.Loading))
 
         disposable = repository.get(newPage)
+            .map { items ->
+                mapToUiModel(items, current.items)
+            }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeBy(
-                onSuccess = { items ->
+                onSuccess = { (items, size) ->
                     mutableModel.postValue(
                         Content(
                             refreshing = false,
                             newPageState = PageState.None,
-                            hasNext = items.size == Const.Network.PAGE_SIZE,
+                            hasNext = size == Const.Network.PAGE_SIZE,
                             lastLoadedPage = newPage,
-                            items = current.items + items
+                            items = items
                         )
                     )
                 },
@@ -96,6 +106,22 @@ class ArtCollectionViewModel @Inject constructor(
                     )
                 }
             )
+    }
+
+    private fun mapToUiModel(
+        newItems: List<ArtCollectionItem>,
+        currentItems: List<ArtCollectionUiModel> = emptyList()
+    ): Pair<ArrayList<ArtCollectionUiModel>, Int> {
+        val output = ArrayList<ArtCollectionUiModel>(currentItems)
+        var lastAuthor: String? = (output.lastOrNull() as? Item)?.item?.author
+        newItems.forEach { item ->
+            if (item.author != null && lastAuthor != item.author) {
+                lastAuthor = item.author
+                output += Header(item.author)
+            }
+            output += Item(item)
+        }
+        return output to newItems.size
     }
 
     fun reload() {
