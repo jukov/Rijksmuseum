@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -58,6 +58,7 @@ import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtColle
 import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiState
 import info.jukov.rijksmuseum.feature.art.collection.presentation.model.PageState
 import info.jukov.rijksmuseum.ui.theme.RijksmuseumTheme
+import info.jukov.rijksmuseum.util.shimmerLoadingAnimation
 import info.jukov.rijksmuseum.util.shouldLoadMore
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,12 +96,12 @@ fun ArtCollectionScreen(
             when (model) {
                 is ArtCollectionUiState.Content ->
                     Content(
-                        outerPadding = innerPadding,
-                        model = model,
                         onItemClick = onItemClick,
                         onRefresh = { viewModel.refresh() },
                         onLoadMore = { viewModel.loadMore() },
-                        onPageReload = { viewModel.reloadPage() }
+                        onPageReload = { viewModel.reloadPage() },
+                        outerPadding = innerPadding,
+                        model = model
                     )
 
                 ArtCollectionUiState.EmptyProgress ->
@@ -124,12 +125,12 @@ fun ArtCollectionScreen(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun Content(
-    outerPadding: PaddingValues,
-    model: ArtCollectionUiState.Content,
     onItemClick: (itemId: String, itemName: String) -> Unit,
     onRefresh: () -> Unit,
     onLoadMore: () -> Unit,
-    onPageReload: () -> Unit
+    onPageReload: () -> Unit,
+    outerPadding: PaddingValues,
+    model: ArtCollectionUiState.Content
 ) {
     val listState = rememberLazyStaggeredGridState()
 
@@ -262,17 +263,56 @@ private fun ArtItem(
     }
 }
 
+@Suppress("NAME_SHADOWING")
 @Composable
 private fun EmptyProgress(outerPadding: PaddingValues) {
-    //TODO shimmer
     //TODO animate change
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .padding(outerPadding)
-            .fillMaxSize()
-    ) {
-        CircularProgressIndicator()
+    Box(modifier = Modifier.padding(outerPadding)) {
+        LazyVerticalStaggeredGrid(
+            columns = StaggeredGridCells.Adaptive(150.dp),
+            modifier = Modifier.padding(horizontal = 8.dp),
+            userScrollEnabled = false
+        ) {
+            for(i in 1..4) {
+                item(span = StaggeredGridItemSpan.FullLine) {
+                    Box {
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp, vertical = 16.dp)
+                                .height(24.dp)
+                                .clip(RoundedCornerShape(8.dp))
+                                .shimmerLoadingAnimation()
+                        )
+                    }
+                }
+                for (i in 1..4) {
+                    item {
+                        Card(
+                            modifier = Modifier.padding(4.dp)
+                        ) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Spacer(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(140.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .shimmerLoadingAnimation(true)
+                                )
+                                Spacer(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(24.dp)
+                                        .padding(top = 8.dp)
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .shimmerLoadingAnimation()
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -399,7 +439,7 @@ fun ContentPreview() {
             )
         })
     RijksmuseumTheme {
-        Content(PaddingValues(), model, { _, _ -> }, { }, { }, { })
+        Content({ _, _ -> }, { }, { }, { }, PaddingValues(), model)
     }
 }
 
@@ -431,8 +471,8 @@ fun PageErrorPreview() {
 @Composable
 fun ArtCollectionItemPreview() {
     ArtItem(
-        { _, _ -> },
-        ArtCollectionItem(
+        onItemClick = { _, _ -> },
+        item = ArtCollectionItem(
             "1",
             "Painting",
             "Painting from The Famous Author",

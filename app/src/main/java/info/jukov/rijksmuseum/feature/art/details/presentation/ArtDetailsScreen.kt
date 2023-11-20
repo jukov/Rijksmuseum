@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -18,7 +18,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -50,6 +49,7 @@ import coil.compose.AsyncImage
 import info.jukov.rijksmuseum.R
 import info.jukov.rijksmuseum.feature.art.details.domain.model.ArtDetails
 import info.jukov.rijksmuseum.feature.art.details.presentation.model.ArtDetailsUiModel
+import info.jukov.rijksmuseum.util.shimmerLoadingAnimation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -266,19 +266,51 @@ private fun DescriptionRow(
     }
 }
 
+@Suppress("NAME_SHADOWING")
 @Composable
 private fun Progress(
     outerPadding: PaddingValues
 ) {
-    //TODO shimmer
-    //TODO animate change
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .padding(outerPadding)
-            .fillMaxSize()
-    ) {
-        CircularProgressIndicator()
+    Box(modifier = Modifier.padding(outerPadding)) {
+        Column(
+            modifier = Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp)
+        ) {
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(320.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .shimmerLoadingAnimation(true)
+            )
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(64.dp)
+                    .padding(top = 16.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .shimmerLoadingAnimation()
+            )
+            for (i in 1..5) {
+                Spacer(
+                    modifier = Modifier
+                        .width(90.dp)
+                        .height(38.dp)
+                        .padding(top = 16.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .shimmerLoadingAnimation()
+                )
+                for (i in 1..3) {
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .padding(top = 8.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .shimmerLoadingAnimation()
+                    )
+                }
+            }
+        }
     }
 }
 

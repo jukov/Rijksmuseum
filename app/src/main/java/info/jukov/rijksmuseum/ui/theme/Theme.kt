@@ -86,6 +86,7 @@ fun RijksmuseumTheme(
     dynamicColor: Boolean = false,//TODO is it possible to combine dyn theme and app color?
     content: @Composable() () -> Unit
 ) {
+    //TODO light theme fixes
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
