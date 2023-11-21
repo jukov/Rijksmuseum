@@ -4,8 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -26,7 +24,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -41,24 +38,22 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import info.jukov.rijksmuseum.R
 import info.jukov.rijksmuseum.feature.art.details.domain.model.ArtDetails
 import info.jukov.rijksmuseum.feature.art.details.presentation.model.ArtDetailsUiModel
+import info.jukov.rijksmuseum.ui.common.ErrorState
 import info.jukov.rijksmuseum.util.shimmerLoadingAnimation
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -135,7 +130,7 @@ fun ArtDetailsScreen(
             enter = fadeIn(),
             exit = fadeOut()
         ) {
-            Error(
+            ErrorState(
                 outerPadding = innerPadding,
                 message = lastErrorMessage,
                 onReloadClick = {
@@ -352,54 +347,6 @@ private fun Progress(
     }
 }
 
-@Composable
-private fun Error(
-    outerPadding: PaddingValues,
-    message: String?,
-    onReloadClick: () -> Unit
-) {
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.padding(outerPadding)
-    ) {
-        Image(
-            painter = painterResource(R.drawable.baseline_palette_24),
-            contentDescription = stringResource(R.string.art_collection_empty_error_icon_content_description),
-            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary),
-            modifier = Modifier
-                .width(48.dp)
-                .height(48.dp)
-                .padding(horizontal = 32.dp)
-        )
-        Text(
-            text = stringResource(R.string.art_collection_empty_error),
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 16.dp, start = 32.dp, end = 32.dp),
-            maxLines = 5,
-            overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.titleMedium
-        )
-
-        Text(
-            text = message ?: stringResource(R.string.art_collection_empty_error_undocumented),
-            fontSize = 16.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 8.dp, start = 32.dp, end = 32.dp),
-            maxLines = 5,
-            overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.bodyMedium
-        )
-
-        OutlinedButton(
-            onClick = onReloadClick,
-            modifier = Modifier.padding(top = 16.dp, start = 32.dp, end = 32.dp)
-        ) {
-            Text(text = stringResource(R.string.art_collection_empty_error_reload))
-        }
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun ContentPreview() {
@@ -425,10 +372,4 @@ fun ContentPreview() {
 @Composable
 fun ProgressPreview() {
     Progress(PaddingValues())
-}
-
-@Preview(showBackground = true, widthDp = 300, heightDp = 300)
-@Composable
-fun ErrorPreview() {
-    Error(PaddingValues(), "Can't connect to server", {})
 }
