@@ -15,12 +15,20 @@ class ArtCollectionRepositoryImpl @Inject constructor(
             .getCollection(page = page)
             .map { dto ->
                 dto.artObjects?.mapNotNull { artObject ->
+                    val width = artObject?.webImage?.width
+                    val height = artObject?.webImage?.height
+                    val aspectRatio = if (width != null && height != null) {
+                        width.toFloat() / height.toFloat()
+                    } else {
+                        null
+                    }
                     ArtCollectionItem(
                         artObject?.objectNumber ?: return@mapNotNull null,
                         artObject.title ?: return@mapNotNull null,
                         artObject.longTitle ?: return@mapNotNull null,
                         artObject.principalOrFirstMaker,
-                        artObject.webImage?.url
+                        artObject.webImage?.url,
+                        aspectRatio
                     )
                 } ?: emptyList()
             }

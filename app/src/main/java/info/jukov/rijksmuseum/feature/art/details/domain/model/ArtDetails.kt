@@ -10,5 +10,6 @@ data class ArtDetails(
     val materials: List<String>,
     val techniques: List<String>,
     val dimensions: List<String>,
-    val imageUrl: String?
+    val imageUrl: String?,
+    val imageAspectRatio: Float?
 )

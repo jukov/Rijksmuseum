@@ -17,6 +17,13 @@ class ArtDetailsRepositoryImpl @Inject constructor(
                 with(requireNotNull(dto.artObject)) {
                     val makers: List<Maker> = makers ?: emptyList()
                     val principalMakers: List<Maker> = principalMakers ?: emptyList()
+                    val width = webImage?.width
+                    val height = webImage?.height
+                    val aspectRatio = if (width != null && height != null) {
+                        width.toFloat() / height.toFloat()
+                    } else {
+                        null
+                    }
                     ArtDetails(
                         requireNotNull(this.id),
                         requireNotNull(title),
@@ -43,7 +50,8 @@ class ArtDetailsRepositoryImpl @Inject constructor(
                                 append(dimension.unit ?: return@mapNotNull null)
                             }
                         } ?: emptyList(),
-                        webImage?.url
+                        webImage?.url,
+                        aspectRatio
                     )
                 }
             }

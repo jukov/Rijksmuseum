@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -134,7 +135,17 @@ private fun Content(
         ) {
             val groupTitleStyle = MaterialTheme.typography.headlineSmall
 
-            if (item.imageUrl == null) {
+            if (item.imageUrl != null && item.imageAspectRatio != null) {
+                AsyncImage(
+                    model = item.imageUrl,
+                    contentDescription = stringResource(R.string.art_collection_object_image_content_description),
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .fillMaxWidth()
+                        .aspectRatio(item.imageAspectRatio)
+                )
+            } else {
                 Card(
                     border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant),
                     modifier = Modifier.fillMaxWidth()
@@ -148,14 +159,6 @@ private fun Content(
                             .align(Alignment.CenterHorizontally)
                     )
                 }
-            } else {
-                //TODO placeholder with approx size of container from api
-                AsyncImage(
-                    model = item.imageUrl,
-                    contentDescription = stringResource(R.string.art_collection_object_image_content_description),
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.clip(RoundedCornerShape(8.dp))
-                )
             }
             Text(
                 text = item.title,
@@ -377,6 +380,7 @@ fun ContentPreview() {
             listOf("Kotlin", "Jetpack Compose"),
             listOf("KISS", "SOLID"),
             listOf("640KB"),
+            null,
             null
         )
     )

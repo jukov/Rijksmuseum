@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -236,7 +237,16 @@ private fun ArtItem(
             modifier = Modifier
                 .padding(16.dp)
         ) {
-            if (item.imageUrl == null) {
+            if (item.imageUrl != null && item.imageAspectRatio != null) {
+                AsyncImage(
+                    model = item.imageUrl,
+                    contentDescription = stringResource(R.string.art_collection_object_image_content_description),
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.clip(RoundedCornerShape(8.dp))
+                        .fillMaxWidth()
+                        .aspectRatio(item.imageAspectRatio)
+                )
+            } else {
                 Card(border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant)) {
                     Text(
                         text = stringResource(R.string.art_collection_object_image_fallback),
@@ -245,14 +255,6 @@ private fun ArtItem(
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 24.dp)
                     )
                 }
-            } else {
-                //TODO placeholder with approx size of container from api
-                AsyncImage(
-                    model = item.imageUrl,
-                    contentDescription = stringResource(R.string.art_collection_object_image_content_description),
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier.clip(RoundedCornerShape(8.dp))
-                )
             }
             Text(
                 text = item.longTitle,
@@ -266,14 +268,13 @@ private fun ArtItem(
 @Suppress("NAME_SHADOWING")
 @Composable
 private fun EmptyProgress(outerPadding: PaddingValues) {
-    //TODO animate change
     Box(modifier = Modifier.padding(outerPadding)) {
         LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Adaptive(150.dp),
             modifier = Modifier.padding(horizontal = 8.dp),
             userScrollEnabled = false
         ) {
-            for(i in 1..4) {
+            for (i in 1..4) {
                 item(span = StaggeredGridItemSpan.FullLine) {
                     Box {
                         Spacer(
@@ -434,7 +435,8 @@ fun ContentPreview() {
                     "Painting $index",
                     "Painting from famous author $index",
                     "Author $index",
-                    "https://www.google.com/favicon.ico"
+                    "https://www.google.com/favicon.ico",
+                    1f
                 )
             )
         })
@@ -477,6 +479,7 @@ fun ArtCollectionItemPreview() {
             "Painting",
             "Painting from The Famous Author",
             "The Famous Author",
+            null,
             null
         )
     )
