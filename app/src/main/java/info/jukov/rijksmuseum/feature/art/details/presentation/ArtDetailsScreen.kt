@@ -1,5 +1,6 @@
 package info.jukov.rijksmuseum.feature.art.details.presentation
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -30,7 +31,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,8 +55,10 @@ import coil.compose.AsyncImage
 import info.jukov.rijksmuseum.R
 import info.jukov.rijksmuseum.feature.art.details.domain.model.ArtDetails
 import info.jukov.rijksmuseum.feature.art.details.presentation.model.ArtDetailsUiModel
+import info.jukov.rijksmuseum.util.UiState
 import info.jukov.rijksmuseum.util.shimmerLoadingAnimation
 
+@Suppress("NAME_SHADOWING")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ArtDetailsScreen(
@@ -92,23 +99,29 @@ fun ArtDetailsScreen(
             )
         },
     ) { innerPadding ->
+        var uiState by remember { mutableStateOf(UiState.Progress) }
+
         modelState.value?.let { model ->
-            when (model) {
-                is ArtDetailsUiModel.Content ->
+            uiState = model.uiState
+        }
+
+        Crossfade(uiState, label = "ArtDetailsCrossfade") { uiState ->
+            when (uiState) {
+                UiState.Content ->
                     Content(
                         outerPadding = innerPadding,
-                        item = model.data
+                        item = (modelState.value as ArtDetailsUiModel.Content).data
                     )
 
-                ArtDetailsUiModel.Progress ->
+                UiState.Progress ->
                     Progress(
                         outerPadding = innerPadding
                     )
 
-                is ArtDetailsUiModel.Error ->
+                UiState.Error ->
                     Error(
                         outerPadding = innerPadding,
-                        message = model.message,
+                        message = (modelState.value as ArtDetailsUiModel.Error).message,
                         onReloadClick = {
                             viewModel.reload()
                         }
@@ -244,7 +257,11 @@ private fun DescriptionRow(
     title: String,
     items: List<String>
 ) {
-    Row(Modifier.fillMaxWidth().padding(top = 4.dp)) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp)
+    ) {
         Text(
             text = title,
             style = MaterialTheme.typography.titleMedium,

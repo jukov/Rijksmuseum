@@ -1,5 +1,6 @@
 package info.jukov.rijksmuseum.feature.art.collection.presentation
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -35,8 +36,11 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,9 +63,11 @@ import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtColle
 import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiState
 import info.jukov.rijksmuseum.feature.art.collection.presentation.model.PageState
 import info.jukov.rijksmuseum.ui.theme.RijksmuseumTheme
+import info.jukov.rijksmuseum.util.UiState
 import info.jukov.rijksmuseum.util.shimmerLoadingAnimation
 import info.jukov.rijksmuseum.util.shouldLoadMore
 
+@Suppress("NAME_SHADOWING")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ArtCollectionScreen(
@@ -93,27 +99,33 @@ fun ArtCollectionScreen(
             )
         },
     ) { innerPadding ->
+        var uiState by remember { mutableStateOf(UiState.Progress) }
+
         modelState.value?.let { model ->
-            when (model) {
-                is ArtCollectionUiState.Content ->
+            uiState = model.uiState
+        }
+
+        Crossfade(uiState, label = "ArtCollectionCrossfade") { uiState ->
+            when (uiState) {
+                UiState.Content ->
                     Content(
                         onItemClick = onItemClick,
                         onRefresh = { viewModel.refresh() },
                         onLoadMore = { viewModel.loadMore() },
                         onPageReload = { viewModel.reloadPage() },
                         outerPadding = innerPadding,
-                        model = model
+                        model = (modelState.value as ArtCollectionUiState.Content)
                     )
 
-                ArtCollectionUiState.EmptyProgress ->
+                UiState.Progress ->
                     EmptyProgress(
                         outerPadding = innerPadding
                     )
 
-                is ArtCollectionUiState.EmptyError ->
+                UiState.Error ->
                     EmptyError(
                         outerPadding = innerPadding,
-                        message = model.message,
+                        message = (modelState.value as ArtCollectionUiState.EmptyError).message,
                         onReloadClick = {
                             viewModel.reload()
                         }
