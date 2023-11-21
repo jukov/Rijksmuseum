@@ -1,10 +1,6 @@
 package info.jukov.rijksmuseum.feature.art.collection.presentation.model
 
-import info.jukov.rijksmuseum.util.UiState
-
 sealed class ArtCollectionUiState {
-
-    abstract val uiState: UiState
 
     data class Content(
         val refreshing: Boolean,
@@ -12,17 +8,11 @@ sealed class ArtCollectionUiState {
         val hasNext: Boolean,
         val lastLoadedPage: Int,
         val items: List<ArtCollectionUiModel>
-    ) : ArtCollectionUiState() {
-        override val uiState: UiState = UiState.Content
-    }
+    ) : ArtCollectionUiState()
 
-    object EmptyProgress : ArtCollectionUiState() {
-        override val uiState: UiState = UiState.Progress
-    }
+    object EmptyProgress : ArtCollectionUiState()
 
     data class EmptyError(
         val message: String?
-    ) : ArtCollectionUiState() {
-        override val uiState: UiState = UiState.Error
-    }
+    ) : ArtCollectionUiState()
 }

@@ -30,6 +30,9 @@ class ArtCollectionViewModel @Inject constructor(
     private val mutableModel = MutableLiveData<ArtCollectionUiState>(EmptyProgress)
     val model: LiveData<ArtCollectionUiState> = mutableModel
 
+    private val mutableError = MutableLiveData<String?>()
+    val error: LiveData<String?> = mutableError
+
     init {
         loadInitial()
     }
@@ -38,6 +41,8 @@ class ArtCollectionViewModel @Inject constructor(
         if (disposable?.isDisposed == false) {
             return
         }
+        val current = mutableModel.value
+
         disposable = repository.get(1)
             .map { items ->
                 mapToUiModel(items)
@@ -57,7 +62,12 @@ class ArtCollectionViewModel @Inject constructor(
                 },
                 onError = { throwable ->
                     //TODO error mapper
-                    mutableModel.postValue(EmptyError(throwable.message))
+                    if (current is Content) {
+                        mutableError.postValue(throwable.message)
+                        mutableModel.postValue(current.copy(refreshing = false,))
+                    } else {
+                        mutableModel.postValue(EmptyError(throwable.message))
+                    }
                 }
             )
     }
@@ -140,6 +150,10 @@ class ArtCollectionViewModel @Inject constructor(
         }
         mutableModel.postValue(current.copy(refreshing = true))
         loadInitial()
+    }
+
+    fun consumeError() {
+        mutableError.postValue(null)
     }
 
     override fun onCleared() {

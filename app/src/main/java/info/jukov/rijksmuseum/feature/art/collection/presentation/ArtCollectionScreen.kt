@@ -1,8 +1,9 @@
 package info.jukov.rijksmuseum.feature.art.collection.presentation
 
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,12 +16,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.PullRefreshState
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.material3.Card
@@ -30,16 +33,20 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,11 +72,10 @@ import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtColle
 import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiState
 import info.jukov.rijksmuseum.feature.art.collection.presentation.model.PageState
 import info.jukov.rijksmuseum.ui.theme.RijksmuseumTheme
-import info.jukov.rijksmuseum.util.UiState
 import info.jukov.rijksmuseum.util.shimmerLoadingAnimation
 import info.jukov.rijksmuseum.util.shouldLoadMore
+import kotlinx.coroutines.launch
 
-@Suppress("NAME_SHADOWING")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ArtCollectionScreen(
@@ -79,10 +85,15 @@ fun ArtCollectionScreen(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
     val modelState = viewModel.model.observeAsState()
+    val errorState = viewModel.error.observeAsState()
+
+    val scope = rememberCoroutineScope()
+
+    val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
@@ -101,43 +112,62 @@ fun ArtCollectionScreen(
             )
         },
     ) { innerPadding ->
-        var uiState by remember { mutableStateOf(UiState.Progress) }
-
-        modelState.value?.let { model ->
-            uiState = model.uiState
+        errorState.value?.let { error ->
+            scope.launch {
+                snackbarHostState.showSnackbar(error)
+                viewModel.consumeError()
+            }
         }
 
-        Crossfade(uiState, label = "ArtCollectionCrossfade") { uiState ->
-            when (uiState) {
-                UiState.Content ->
-                    Content(
-                        onItemClick = onItemClick,
-                        onRefresh = { viewModel.refresh() },
-                        onLoadMore = { viewModel.loadMore() },
-                        onPageReload = { viewModel.reloadPage() },
-                        outerPadding = innerPadding,
-                        model = (modelState.value as ArtCollectionUiState.Content)
-                    )
+        AnimatedVisibility(
+            visible = modelState.value is ArtCollectionUiState.Content,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Content(
+                onItemClick = onItemClick,
+                onRefresh = { viewModel.refresh() },
+                onLoadMore = { viewModel.loadMore() },
+                onPageReload = { viewModel.reloadPage() },
+                outerPadding = innerPadding,
+                model = (modelState.value as? ArtCollectionUiState.Content)
+            )
+        }
 
-                UiState.Progress ->
-                    EmptyProgress(
-                        outerPadding = innerPadding
-                    )
+        AnimatedVisibility(
+            visible = modelState.value is ArtCollectionUiState.EmptyProgress,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            EmptyProgress(
+                outerPadding = innerPadding
+            )
+        }
 
-                UiState.Error ->
-                    EmptyError(
-                        outerPadding = innerPadding,
-                        message = (modelState.value as ArtCollectionUiState.EmptyError).message,
-                        onReloadClick = {
-                            viewModel.reload()
-                        }
-                    )
-            }
+        var lastErrorMessage by remember {
+            mutableStateOf((modelState.value as? ArtCollectionUiState.EmptyError)?.message)
+        }
+
+        (modelState.value as? ArtCollectionUiState.EmptyError)?.message?.let { message ->
+            lastErrorMessage = message
+        }
+
+        AnimatedVisibility(
+            visible = modelState.value is ArtCollectionUiState.EmptyError,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            EmptyError(
+                outerPadding = innerPadding,
+                message = lastErrorMessage,
+                onReloadClick = {
+                    viewModel.reload()
+                }
+            )
         }
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun Content(
     onItemClick: (itemId: String, itemName: String) -> Unit,
@@ -145,16 +175,18 @@ private fun Content(
     onLoadMore: () -> Unit,
     onPageReload: () -> Unit,
     outerPadding: PaddingValues,
-    model: ArtCollectionUiState.Content
+    model: ArtCollectionUiState.Content?
 ) {
-    val listState = rememberLazyStaggeredGridState()
+    if (model == null) return
 
-    val pullRefreshState = rememberPullRefreshState(
+    val listState: LazyStaggeredGridState = rememberLazyStaggeredGridState()
+
+    val pullRefreshState: PullRefreshState = rememberPullRefreshState(
         refreshing = model.refreshing,
         onRefresh = onRefresh
     )
 
-    val shouldLoadMore = remember {
+    val shouldLoadMore: State<Boolean> = remember {
         derivedStateOf { listState.shouldLoadMore() }
     }
 

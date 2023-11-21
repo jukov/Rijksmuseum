@@ -1,6 +1,8 @@
 package info.jukov.rijksmuseum.feature.art.details.presentation
 
-import androidx.compose.animation.Crossfade
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -57,10 +59,8 @@ import coil.request.ImageRequest
 import info.jukov.rijksmuseum.R
 import info.jukov.rijksmuseum.feature.art.details.domain.model.ArtDetails
 import info.jukov.rijksmuseum.feature.art.details.presentation.model.ArtDetailsUiModel
-import info.jukov.rijksmuseum.util.UiState
 import info.jukov.rijksmuseum.util.shimmerLoadingAnimation
 
-@Suppress("NAME_SHADOWING")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ArtDetailsScreen(
@@ -101,34 +101,47 @@ fun ArtDetailsScreen(
             )
         },
     ) { innerPadding ->
-        var uiState by remember { mutableStateOf(UiState.Progress) }
-
-        modelState.value?.let { model ->
-            uiState = model.uiState
+        AnimatedVisibility(
+            visible = modelState.value is ArtDetailsUiModel.Content,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Content(
+                outerPadding = innerPadding,
+                item = (modelState.value as ArtDetailsUiModel.Content).data
+            )
         }
 
-        Crossfade(uiState, label = "ArtDetailsCrossfade") { uiState ->
-            when (uiState) {
-                UiState.Content ->
-                    Content(
-                        outerPadding = innerPadding,
-                        item = (modelState.value as ArtDetailsUiModel.Content).data
-                    )
+        AnimatedVisibility(
+            visible = modelState.value is ArtDetailsUiModel.Progress,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Progress(
+                outerPadding = innerPadding
+            )
+        }
 
-                UiState.Progress ->
-                    Progress(
-                        outerPadding = innerPadding
-                    )
+        var lastErrorMessage by remember {
+            mutableStateOf((modelState.value as? ArtDetailsUiModel.Error)?.message)
+        }
 
-                UiState.Error ->
-                    Error(
-                        outerPadding = innerPadding,
-                        message = (modelState.value as ArtDetailsUiModel.Error).message,
-                        onReloadClick = {
-                            viewModel.reload()
-                        }
-                    )
-            }
+        (modelState.value as? ArtDetailsUiModel.Error)?.message?.let { message ->
+            lastErrorMessage = message
+        }
+
+        AnimatedVisibility(
+            visible = modelState.value is ArtDetailsUiModel.Error,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            Error(
+                outerPadding = innerPadding,
+                message = lastErrorMessage,
+                onReloadClick = {
+                    viewModel.reload()
+                }
+            )
         }
     }
 }
