@@ -2,12 +2,14 @@ package info.jukov.rijksmuseum.feature.art.collection.data
 
 import info.jukov.rijksmuseum.feature.art.collection.domain.ArtCollectionRepository
 import info.jukov.rijksmuseum.feature.art.collection.domain.model.ArtCollectionItem
+import info.jukov.rijksmuseum.util.error.ErrorMapper
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import javax.inject.Inject
 
 class ArtCollectionRepositoryImpl @Inject constructor(
-    private val apiService: ArtCollectionApiService
+    private val apiService: ArtCollectionApiService,
+    private val errorMapper: ErrorMapper
 ) : ArtCollectionRepository {
 
     override fun get(page: Int): Single<List<ArtCollectionItem>> =
@@ -31,6 +33,9 @@ class ArtCollectionRepositoryImpl @Inject constructor(
                         aspectRatio
                     )
                 } ?: emptyList()
+            }
+            .onErrorResumeNext { throwable ->
+                Single.error(errorMapper.map(throwable))
             }
             .subscribeOn(Schedulers.io())
 }

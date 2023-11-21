@@ -376,7 +376,7 @@ private fun PageProgress() {
 
 @Composable
 private fun PageError(
-    message: String?,
+    message: Int?,
     onReloadClick: () -> Unit
 ) {
     Row(
@@ -402,7 +402,7 @@ private fun PageError(
             )
 
             Text(
-                text = message ?: stringResource(R.string.art_collection_empty_error_undocumented),
+                text = stringResource(message ?: R.string.error_undocumented),
                 style = MaterialTheme.typography.bodySmall,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis
@@ -457,7 +457,7 @@ fun PageProgressPreview() {
 @Preview(showBackground = true)
 @Composable
 fun PageErrorPreview() {
-    PageError("Can't connect to server") { }
+    PageError(R.string.error_network) { }
 }
 
 @Preview(showBackground = true, widthDp = 150)

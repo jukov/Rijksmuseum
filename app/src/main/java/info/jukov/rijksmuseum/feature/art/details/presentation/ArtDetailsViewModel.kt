@@ -11,6 +11,7 @@ import info.jukov.rijksmuseum.feature.art.details.presentation.model.ArtDetailsU
 import info.jukov.rijksmuseum.feature.art.details.presentation.model.ArtDetailsUiModel.Content
 import info.jukov.rijksmuseum.feature.art.details.presentation.model.ArtDetailsUiModel.Error
 import info.jukov.rijksmuseum.feature.art.details.presentation.model.ArtDetailsUiModel.Progress
+import info.jukov.rijksmuseum.util.error.AppException
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -44,7 +45,7 @@ class ArtDetailsViewModel @Inject constructor(
                     mutableModel.postValue(Content(model))
                 },
                 onError = { throwable ->
-                    mutableModel.postValue(Error(throwable.message))
+                    mutableModel.postValue(Error((throwable as? AppException)?.messageRes))
                 }
             )
     }

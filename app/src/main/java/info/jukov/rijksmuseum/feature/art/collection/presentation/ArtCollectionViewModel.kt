@@ -15,6 +15,7 @@ import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtColle
 import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiState.EmptyError
 import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiState.EmptyProgress
 import info.jukov.rijksmuseum.feature.art.collection.presentation.model.PageState
+import info.jukov.rijksmuseum.util.error.AppException
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.subscribeBy
@@ -61,12 +62,11 @@ class ArtCollectionViewModel @Inject constructor(
                     )
                 },
                 onError = { throwable ->
-                    //TODO error mapper
                     if (current is Content) {
                         mutableError.postValue(throwable.message)
                         mutableModel.postValue(current.copy(refreshing = false,))
                     } else {
-                        mutableModel.postValue(EmptyError(throwable.message))
+                        mutableModel.postValue(EmptyError((throwable as? AppException)?.messageRes))
                     }
                 }
             )
@@ -104,11 +104,10 @@ class ArtCollectionViewModel @Inject constructor(
                     )
                 },
                 onError = { throwable ->
-                    //TODO error mapper
                     mutableModel.postValue(
                         Content(
                             refreshing = false,
-                            newPageState = PageState.Error(throwable.message),
+                            newPageState = PageState.Error((throwable as? AppException)?.messageRes),
                             hasNext = true,
                             lastLoadedPage = current.lastLoadedPage,
                             items = current.items

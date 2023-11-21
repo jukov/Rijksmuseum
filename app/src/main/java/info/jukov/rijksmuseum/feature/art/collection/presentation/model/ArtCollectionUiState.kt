@@ -1,5 +1,7 @@
 package info.jukov.rijksmuseum.feature.art.collection.presentation.model
 
+import androidx.annotation.StringRes
+
 sealed class ArtCollectionUiState {
 
     data class Content(
@@ -12,7 +14,5 @@ sealed class ArtCollectionUiState {
 
     object EmptyProgress : ArtCollectionUiState()
 
-    data class EmptyError(
-        val message: String?
-    ) : ArtCollectionUiState()
+    data class EmptyError(@StringRes val message: Int?) : ArtCollectionUiState()
 }

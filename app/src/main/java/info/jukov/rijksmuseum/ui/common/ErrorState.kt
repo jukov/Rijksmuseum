@@ -22,7 +22,7 @@ import info.jukov.rijksmuseum.R
 @Composable
 fun ErrorState(
     outerPadding: PaddingValues,
-    message: String?,
+    message: Int?,
     onReloadClick: () -> Unit
 ) {
     Column(
@@ -42,7 +42,7 @@ fun ErrorState(
         )
 
         Text(
-            text = message ?: stringResource(R.string.art_collection_empty_error_undocumented),
+            text = stringResource(message ?: R.string.error_undocumented),
             fontSize = 16.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(top = 8.dp, start = 32.dp, end = 32.dp),
@@ -63,5 +63,5 @@ fun ErrorState(
 @Preview(showBackground = true, widthDp = 300, heightDp = 600)
 @Composable
 fun ErrorStatePreview() {
-    ErrorState(PaddingValues(), "Can't connect to server", {})
+    ErrorState(PaddingValues(), R.string.error_network, {})
 }

@@ -3,12 +3,14 @@ package info.jukov.rijksmuseum.feature.art.details.data
 import info.jukov.rijksmuseum.feature.art.details.data.model.ArtDetailsDto.ArtObject.Maker
 import info.jukov.rijksmuseum.feature.art.details.domain.ArtDetailsRepository
 import info.jukov.rijksmuseum.feature.art.details.domain.model.ArtDetails
+import info.jukov.rijksmuseum.util.error.ErrorMapper
 import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.schedulers.Schedulers
 import javax.inject.Inject
 
 class ArtDetailsRepositoryImpl @Inject constructor(
-    private val artDetailsApiService: ArtDetailsApiService
+    private val artDetailsApiService: ArtDetailsApiService,
+    private val errorMapper: ErrorMapper
 ) : ArtDetailsRepository {
 
     override fun get(id: String): Single<ArtDetails> =
@@ -54,6 +56,9 @@ class ArtDetailsRepositoryImpl @Inject constructor(
                         aspectRatio
                     )
                 }
+            }
+            .onErrorResumeNext { throwable ->
+                Single.error(errorMapper.map(throwable))
             }
             .subscribeOn(Schedulers.io())
 
