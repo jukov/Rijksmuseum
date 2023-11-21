@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="Theme.Rijksmuseum" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="NightAdjusted.Theme.Rijksmuseum" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.Rijksmuseum" parent="NightAdjusted.Theme.Rijksmuseum" />
+
+    <style name="NightAdjusted.Theme.Splash" parent="Theme.SplashScreen">
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
+    </style>
+
+    <style name="Theme.Rijksmuseum.Splash" parent="NightAdjusted.Theme.Splash">
+        <item name="android:windowSplashScreenIconBackgroundColor" tools:targetApi="s">@color/splash_icon_background</item>
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="postSplashScreenTheme">@style/Theme.Rijksmuseum</item>
+    </style>
 </resources>
