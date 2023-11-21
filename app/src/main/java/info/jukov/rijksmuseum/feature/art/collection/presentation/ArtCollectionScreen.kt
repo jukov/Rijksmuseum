@@ -47,6 +47,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -56,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import info.jukov.rijksmuseum.R
 import info.jukov.rijksmuseum.feature.art.collection.domain.model.ArtCollectionItem
 import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiModel
@@ -251,7 +253,10 @@ private fun ArtItem(
         ) {
             if (item.imageUrl != null && item.imageAspectRatio != null) {
                 AsyncImage(
-                    model = item.imageUrl,
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(item.imageUrl)
+                        .crossfade(true)
+                        .build(),
                     contentDescription = stringResource(R.string.art_collection_object_image_content_description),
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.clip(RoundedCornerShape(8.dp))
