@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -14,6 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import dagger.hilt.android.AndroidEntryPoint
 import info.jukov.rijksmuseum.feature.art.collection.presentation.ArtCollectionScreen
+import info.jukov.rijksmuseum.feature.art.collection.presentation.ArtCollectionViewModel
 import info.jukov.rijksmuseum.feature.art.details.presentation.ArtDetailsScreen
 import info.jukov.rijksmuseum.ui.theme.RijksmuseumTheme
 
@@ -27,6 +29,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
 
+            val viewModel: ArtCollectionViewModel = hiltViewModel()
+            viewModel.init()
+
             RijksmuseumTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -38,9 +43,9 @@ class MainActivity : ComponentActivity() {
                                 onItemClick = { itemId: String, itemName: String ->
                                     navController.navigate(
                                         "art/$itemId/$itemName",
-
                                     )
-                                }
+                                },
+                                viewModel
                             )
                         }
                         composable(

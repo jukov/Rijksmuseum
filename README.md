@@ -9,6 +9,8 @@
 * OkHttp
 * Retrofit
 * Coil
+* JUnit
+* Mockk
 
 ## Possible improvements
 
@@ -20,3 +22,4 @@
 ### Technical
 
 * Since art details looks as final data that will not change over time, they can be cached in memory using LRU or in persistent memory with more complex invalidation mechanism.
+* I didn't write unit tests for Repositories, but it might be a good idea since they contain mappers with small parts of logic. 

@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import info.jukov.rijksmuseum.Const
+import info.jukov.rijksmuseum.di.PageSize
 import info.jukov.rijksmuseum.feature.art.collection.domain.ArtCollectionRepository
 import info.jukov.rijksmuseum.feature.art.collection.domain.model.ArtCollectionItem
 import info.jukov.rijksmuseum.feature.art.collection.presentation.model.ArtCollectionUiModel
@@ -19,11 +19,13 @@ import info.jukov.rijksmuseum.util.error.AppException
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.kotlin.subscribeBy
+import java.util.Optional
 import javax.inject.Inject
 
 @HiltViewModel
 class ArtCollectionViewModel @Inject constructor(
-    private val repository: ArtCollectionRepository
+    private val repository: ArtCollectionRepository,
+    @PageSize private val pageSize: Int
 ) : ViewModel() {
 
     private var disposable: Disposable? = null
@@ -31,10 +33,10 @@ class ArtCollectionViewModel @Inject constructor(
     private val mutableModel = MutableLiveData<ArtCollectionUiState>(EmptyProgress)
     val model: LiveData<ArtCollectionUiState> = mutableModel
 
-    private val mutableError = MutableLiveData<String?>()
-    val error: LiveData<String?> = mutableError
+    private val mutableError = MutableLiveData<Optional<Int>?>()
+    val error: LiveData<Optional<Int>?> = mutableError
 
-    init {
+    fun init() {
         loadInitial()
     }
 
@@ -55,7 +57,7 @@ class ArtCollectionViewModel @Inject constructor(
                         Content(
                             refreshing = false,
                             newPageState = PageState.None,
-                            hasNext = size == Const.Network.PAGE_SIZE,
+                            hasNext = size == pageSize,
                             lastLoadedPage = 1,
                             items = items
                         )
@@ -63,8 +65,10 @@ class ArtCollectionViewModel @Inject constructor(
                 },
                 onError = { throwable ->
                     if (current is Content) {
-                        mutableError.postValue(throwable.message)
-                        mutableModel.postValue(current.copy(refreshing = false,))
+                        mutableError.postValue(
+                            Optional.ofNullable((throwable as? AppException)?.messageRes)
+                        )
+                        mutableModel.postValue(current.copy(refreshing = false))
                     } else {
                         mutableModel.postValue(EmptyError((throwable as? AppException)?.messageRes))
                     }
@@ -97,7 +101,7 @@ class ArtCollectionViewModel @Inject constructor(
                         Content(
                             refreshing = false,
                             newPageState = PageState.None,
-                            hasNext = size == Const.Network.PAGE_SIZE,
+                            hasNext = size == pageSize,
                             lastLoadedPage = newPage,
                             items = items
                         )
@@ -124,7 +128,7 @@ class ArtCollectionViewModel @Inject constructor(
         val output = ArrayList<ArtCollectionUiModel>(currentItems)
         var lastAuthor: String? = (output.lastOrNull() as? Item)?.item?.author
         newItems.forEach { item ->
-            if (item.author != null && lastAuthor != item.author) {
+            if (lastAuthor != item.author) {
                 lastAuthor = item.author
                 output += Header(item.author)
             }

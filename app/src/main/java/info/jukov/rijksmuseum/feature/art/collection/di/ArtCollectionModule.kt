@@ -7,6 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import info.jukov.rijksmuseum.Const
+import info.jukov.rijksmuseum.di.PageSize
 import info.jukov.rijksmuseum.feature.art.collection.data.ArtCollectionApiService
 import info.jukov.rijksmuseum.feature.art.collection.data.ArtCollectionRepositoryImpl
 import info.jukov.rijksmuseum.feature.art.collection.domain.ArtCollectionRepository
@@ -25,6 +26,11 @@ abstract class ArtCollectionModule {
     ): ArtCollectionRepository
 
     companion object {
+
+        @Provides
+        @PageSize
+        fun providePageSize(): Int = Const.Network.PAGE_SIZE
+
         @Provides
         fun provideCollectionApiService(
             moshi: Moshi,

@@ -57,7 +57,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import info.jukov.rijksmuseum.R
@@ -76,7 +75,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ArtCollectionScreen(
     onItemClick: (itemId: String, itemName: String) -> Unit,
-    viewModel: ArtCollectionViewModel = hiltViewModel()
+    viewModel: ArtCollectionViewModel
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
@@ -109,8 +108,9 @@ fun ArtCollectionScreen(
         },
     ) { innerPadding ->
         errorState.value?.let { error ->
+            val stringError = stringResource(error.orElse(R.string.error_undocumented))
             scope.launch {
-                snackbarHostState.showSnackbar(error)
+                snackbarHostState.showSnackbar(stringError)
                 viewModel.consumeError()
             }
         }
@@ -287,7 +287,8 @@ private fun ArtItem(
                         .build(),
                     contentDescription = stringResource(R.string.art_collection_object_image_content_description),
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.clip(RoundedCornerShape(8.dp))
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
                         .fillMaxWidth()
                         .aspectRatio(item.imageAspectRatio)
                 )

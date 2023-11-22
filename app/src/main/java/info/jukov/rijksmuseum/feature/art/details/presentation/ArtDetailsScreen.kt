@@ -30,6 +30,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -52,7 +53,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import info.jukov.rijksmuseum.R
 import info.jukov.rijksmuseum.feature.art.details.domain.model.ArtDetails
-import info.jukov.rijksmuseum.feature.art.details.presentation.model.ArtDetailsUiModel
+import info.jukov.rijksmuseum.feature.art.details.presentation.model.ArtDetailsUiState
 import info.jukov.rijksmuseum.ui.common.ErrorState
 import info.jukov.rijksmuseum.util.shimmerLoadingAnimation
 
@@ -63,6 +64,10 @@ fun ArtDetailsScreen(
     itemName: String,
     viewModel: ArtDetailsViewModel = hiltViewModel()
 ) {
+    LaunchedEffect(Unit) {
+        viewModel.init()
+    }
+
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
 
     val modelState = viewModel.model.observeAsState()
@@ -97,18 +102,18 @@ fun ArtDetailsScreen(
         },
     ) { innerPadding ->
         AnimatedVisibility(
-            visible = modelState.value is ArtDetailsUiModel.Content,
+            visible = modelState.value is ArtDetailsUiState.Content,
             enter = fadeIn(),
             exit = fadeOut()
         ) {
             Content(
                 outerPadding = innerPadding,
-                item = (modelState.value as ArtDetailsUiModel.Content).data
+                item = (modelState.value as ArtDetailsUiState.Content).data
             )
         }
 
         AnimatedVisibility(
-            visible = modelState.value is ArtDetailsUiModel.Progress,
+            visible = modelState.value is ArtDetailsUiState.Progress,
             enter = fadeIn(),
             exit = fadeOut()
         ) {
@@ -118,15 +123,15 @@ fun ArtDetailsScreen(
         }
 
         var lastErrorMessage by remember {
-            mutableStateOf((modelState.value as? ArtDetailsUiModel.Error)?.message)
+            mutableStateOf((modelState.value as? ArtDetailsUiState.Error)?.message)
         }
 
-        (modelState.value as? ArtDetailsUiModel.Error)?.message?.let { message ->
+        (modelState.value as? ArtDetailsUiState.Error)?.message?.let { message ->
             lastErrorMessage = message
         }
 
         AnimatedVisibility(
-            visible = modelState.value is ArtDetailsUiModel.Error,
+            visible = modelState.value is ArtDetailsUiState.Error,
             enter = fadeIn(),
             exit = fadeOut()
         ) {

@@ -4,7 +4,7 @@ data class ArtCollectionItem(
     val id: String,
     val title: String,
     val longTitle: String,
-    val author: String?,
+    val author: String,
     val imageUrl: String?,
     val imageAspectRatio: Float?
 )
