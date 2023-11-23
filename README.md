@@ -31,7 +31,9 @@ apikey=%YOUR_API_KEY%
 
 ### Technical
 
-* Since art details appear to be  final data that will not change over time, they can be cached in memory using LRU or in persistent memory with more complex invalidation mechanism.
+* Since art details appear to be final data that will not change over time, they can be cached in memory using LRU or in persistent memory with more complex invalidation mechanism.
 * I haven't written  unit tests for Repositories, but it might be a good idea since they contain mappers with small parts of logic.
 * Project can be migrated to KSP, but I decided use kapt, because Dagger KSP still in alpha.
 * More instrumented tests should be written.
+* I have used Coil's SubcomposeAsyncImage in ArtCollection list, although Coil devs said that is can cause some performance issues. It might be good idea to investigate this functionality more precisely.
+* Reload button for images should be provided in case of network error.

@@ -50,7 +50,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import info.jukov.rijksmuseum.R
 import info.jukov.rijksmuseum.feature.art.details.domain.model.ArtDetails
@@ -168,7 +168,7 @@ private fun Content(
             val groupTitleStyle = MaterialTheme.typography.headlineSmall
 
             if (item.imageUrl != null && item.imageAspectRatio != null) {
-                AsyncImage(
+                SubcomposeAsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(item.imageUrl)
                         .crossfade(true)
@@ -178,7 +178,31 @@ private fun Content(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
                         .fillMaxWidth()
-                        .aspectRatio(item.imageAspectRatio)
+                        .aspectRatio(item.imageAspectRatio),
+                    loading = {
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .aspectRatio(item.imageAspectRatio)
+                                .clip(RoundedCornerShape(8.dp))
+                                .shimmerLoadingAnimation()
+                        )
+                    },
+                    error = {
+                        Card(
+                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.onSurfaceVariant),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = stringResource(R.string.art_collection_object_image_error),
+                                style = MaterialTheme.typography.labelSmall,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp, vertical = 24.dp)
+                                    .align(Alignment.CenterHorizontally)
+                            )
+                        }
+                    }
                 )
             } else {
                 Card(
@@ -322,7 +346,7 @@ private fun Progress(
                     .fillMaxWidth()
                     .height(320.dp)
                     .clip(RoundedCornerShape(8.dp))
-                    .shimmerLoadingAnimation(true)
+                    .shimmerLoadingAnimation()
             )
             Spacer(
                 modifier = Modifier
