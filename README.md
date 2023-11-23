@@ -26,12 +26,12 @@ apikey=%YOUR_API_KEY%
 
 ### UX / Features
 
-* Art object images may have Instagram-like gesture for zoom image.
-* ArtDetails description can be synchronized with web version of Rijksmuseum catalog to display data in similar way.
+* Art object images may use Instagram-like gesture for zoom-in the image.
+* ArtDetails description can be synchronized with the web version of Rijksmuseum catalog to display data in a similar way.
 
 ### Technical
 
-* Since art details looks as final data that will not change over time, they can be cached in memory using LRU or in persistent memory with more complex invalidation mechanism.
-* I didn't write unit tests for Repositories, but it might be a good idea since they contain mappers with small parts of logic.
-* Project can be migrated to KSP, but I decided use kapt, because Dagger KSP still in alpha
-* More instrumented tests should be written
+* Since art details appear to be  final data that will not change over time, they can be cached in memory using LRU or in persistent memory with more complex invalidation mechanism.
+* I haven't written  unit tests for Repositories, but it might be a good idea since they contain mappers with small parts of logic.
+* Project can be migrated to KSP, but I decided use kapt, because Dagger KSP still in alpha.
+* More instrumented tests should be written.
