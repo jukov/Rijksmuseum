@@ -182,7 +182,7 @@ class ArtCollectionViewModelTest {
         assertEquals(
             ArtCollectionUiState.Content(
                 refreshing = false,
-                newPageState = PageState.Loading,
+                newPageState = PageState.Progress,
                 hasNext = true,
                 lastLoadedPage = 1,
                 items = uiModels_UniqueAuthors_Page1

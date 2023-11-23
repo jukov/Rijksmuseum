@@ -42,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -61,11 +62,13 @@ import info.jukov.rijksmuseum.util.shimmerLoadingAnimation
 @Composable
 fun ArtDetailsScreen(
     onBackClick: () -> Unit,
+    itemId: String,
     itemName: String,
     viewModel: ArtDetailsViewModel = hiltViewModel()
 ) {
     LaunchedEffect(Unit) {
         viewModel.init()
+
     }
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
@@ -73,7 +76,8 @@ fun ArtDetailsScreen(
     val modelState = viewModel.model.observeAsState()
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection)
+            .testTag("ArtDetailsScaffold$itemId"),
         topBar = {
             TopAppBar(
                 colors = TopAppBarDefaults.smallTopAppBarColors(

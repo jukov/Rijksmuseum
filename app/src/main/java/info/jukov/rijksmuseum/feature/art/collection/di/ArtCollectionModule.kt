@@ -18,10 +18,10 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 
 @Module
 @InstallIn(ViewModelComponent::class)
-abstract class ArtCollectionModule {
+interface ArtCollectionModule {
 
     @Binds
-    abstract fun bindCollectionRepository(
+    fun bindCollectionRepository(
         impl: ArtCollectionRepositoryImpl
     ): ArtCollectionRepository
 

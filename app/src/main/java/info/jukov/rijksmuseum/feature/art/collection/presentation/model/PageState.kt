@@ -6,7 +6,7 @@ sealed class PageState {
 
     object None: PageState()
 
-    object Loading: PageState()
+    object Progress: PageState()
 
     data class Error(@StringRes val message: Int?): PageState()
 }

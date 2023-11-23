@@ -88,7 +88,7 @@ class ArtCollectionViewModel @Inject constructor(
             return
         }
         val newPage = current.lastLoadedPage + 1
-        mutableModel.postValue(current.copy(newPageState = PageState.Loading))
+        mutableModel.postValue(current.copy(newPageState = PageState.Progress))
 
         disposable = repository.get(newPage)
             .map { items ->

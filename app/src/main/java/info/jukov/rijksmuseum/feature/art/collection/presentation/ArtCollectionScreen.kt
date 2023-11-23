@@ -52,6 +52,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -87,7 +88,9 @@ fun ArtCollectionScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
+            .testTag("ArtCollectionScaffold"),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             CenterAlignedTopAppBar(
@@ -190,6 +193,7 @@ private fun Content(
         modifier = Modifier
             .pullRefresh(pullRefreshState)
             .padding(outerPadding)
+            .testTag("ArtCollectionContent")
     ) {
         LazyVerticalStaggeredGrid(
             state = listState,
@@ -224,7 +228,7 @@ private fun Content(
                     }
                 }
 
-                PageState.Loading -> {
+                PageState.Progress -> {
                     item(span = StaggeredGridItemSpan.FullLine) {
                         PageProgress()
                     }
@@ -274,6 +278,7 @@ private fun ArtItem(
         onClick = { onItemClick(item.id, item.title) },
         modifier = Modifier
             .padding(4.dp)
+            .testTag("card${item.id}")
     ) {
         Column(
             modifier = Modifier
@@ -314,7 +319,10 @@ private fun ArtItem(
 @Suppress("NAME_SHADOWING")
 @Composable
 private fun EmptyProgress(outerPadding: PaddingValues) {
-    Box(modifier = Modifier.padding(outerPadding)) {
+    Box(modifier = Modifier
+        .padding(outerPadding)
+        .testTag("ArtCollectionEmptyProgress")
+    ) {
         LazyVerticalStaggeredGrid(
             columns = StaggeredGridCells.Adaptive(150.dp),
             modifier = Modifier.padding(horizontal = 8.dp),
@@ -368,7 +376,8 @@ private fun PageProgress() {
     Box(
         modifier = Modifier
             .height(96.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .testTag("ArtCollectionPageProgress"),
         contentAlignment = Alignment.Center
     ) {
         CircularProgressIndicator()
@@ -386,6 +395,7 @@ private fun PageError(
             .height(96.dp)
             .padding(horizontal = 16.dp)
             .fillMaxWidth()
+            .testTag("ArtCollectionPageError")
     ) {
         Column(
             verticalArrangement = Arrangement.Center,

@@ -57,6 +57,7 @@ class MainActivity : ComponentActivity() {
                         ) { backStackEntry ->
                             ArtDetailsScreen(
                                 onBackClick = { navController.popBackStack() },
+                                itemId = requireNotNull(backStackEntry.arguments?.getString(Const.Keys.ITEM_ID)),
                                 itemName = requireNotNull(backStackEntry.arguments?.getString(Const.Keys.ITEM_NAME))
                             )
                         }
