@@ -23,7 +23,15 @@ android {
             useSupportLibrary = true
         }
     }
-
+    signingConfigs {
+        create("release") {
+            val releaseProperties = loadProperties("release.properties")
+            storeFile = file(releaseProperties.getProperty("signing.keystore.file"))
+            storePassword = releaseProperties.getProperty("signing.keystore.password")
+            keyAlias = releaseProperties.getProperty("signing.key.alias")
+            keyPassword = releaseProperties.getProperty("signing.key.password")
+        }
+    }
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -31,6 +39,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {

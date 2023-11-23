@@ -28,6 +28,7 @@ apikey=%YOUR_API_KEY%
 
 * Art object images may use Instagram-like gesture for zoom-in the image.
 * ArtDetails description can be synchronized with the web version of Rijksmuseum catalog to display data in a similar way.
+* Reload button for images should be provided in case of network error.
 
 ### Technical
 
@@ -35,5 +36,5 @@ apikey=%YOUR_API_KEY%
 * I haven't written  unit tests for Repositories, but it might be a good idea since they contain mappers with small parts of logic.
 * Project can be migrated to KSP, but I decided use kapt, because Dagger KSP still in alpha.
 * More instrumented tests should be written.
-* I have used Coil's SubcomposeAsyncImage in ArtCollection list, although Coil devs said that is can cause some performance issues. It might be good idea to investigate this functionality more precisely.
-* Reload button for images should be provided in case of network error.
+* I have used Coil's SubcomposeAsyncImage in art collection list, although Coil devs said that is can cause some performance issues. It might be good idea to investigate this functionality more precisely.
+* Code minification may be introduced to make app reverse engineering more challenging. However, it also requires extensive testing, so I decided not to implement it.
